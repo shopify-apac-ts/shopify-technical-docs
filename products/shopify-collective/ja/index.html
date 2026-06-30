@@ -349,15 +349,15 @@
     <header class="topbar">
       <div class="topbar-inner">
         <nav class="crumbs" aria-label="Breadcrumb">
-          <a href="../../">Shopify Technical Docs</a>
+          <a href="../../../">Shopify Technical Docs</a>
           <span>/</span>
           <span>Shopify Collective</span>
         </nav>
         <div class="top-actions">
-          <a href="../../../products/shopify-collective/">English</a>
-          <a href="../../../products/shopify-collective/architecture.md">Source Markdown</a>
-          <a href="../../../products/shopify-collective/shopify-collective-architecture.pptx">PPTX</a>
-          <a href="../../../products/shopify-collective/ja/shopify-collective-architecture-ja.pptx">PPTX JA</a>
+          <a href="../">English</a>
+          <a href="../architecture.md">Source Markdown</a>
+          <a href="../shopify-collective-architecture.pptx">PPTX</a>
+          <a href="./shopify-collective-architecture-ja.pptx">PPTX JA</a>
           <a href="#faq">FAQ</a>
           <a href="#references">References</a>
         </div>
@@ -376,9 +376,9 @@
         <aside class="summary-panel" aria-label="Source model">
           <h2>ソース優先モデル</h2>
           <ul class="summary-list">
-            <li><span class="marker">1</span><span><strong>ソース:</strong> <a href="../../../products/shopify-collective/architecture.md">architecture.md</a></span></li>
+            <li><span class="marker">1</span><span><strong>ソース:</strong> <a href="../architecture.md">architecture.md</a></span></li>
             <li><span class="marker">2</span><span><strong>出力:</strong> GitHub Pages用HTML</span></li>
-            <li><span class="marker">3</span><span><strong>PPTX:</strong> <a href="../../../products/shopify-collective/shopify-collective-architecture.pptx">English</a> / <a href="../../../products/shopify-collective/ja/shopify-collective-architecture-ja.pptx">Japanese</a></span></li>
+            <li><span class="marker">3</span><span><strong>PPTX:</strong> <a href="../shopify-collective-architecture.pptx">English</a> / <a href="./shopify-collective-architecture-ja.pptx">Japanese</a></span></li>
             <li><span class="marker">4</span><span><strong>境界:</strong> Shopify内部実装は含めない</span></li>
           </ul>
         </aside>
@@ -426,7 +426,7 @@
     E --> F["Retailerが販売チャネルに公開"]
 
     F --> G{"在庫"}
-    G --> G1["SupplierのsellableOnlineQuantityをRetailer在庫に反映"]
+    G --> G1["Supplierのオンライン販売可能在庫をRetailer在庫に反映"]
     G --> G2["Supplierまたは接続Retailerでの購入が共有在庫を減らす"]
     G --> G3["Shopify checkoutがSupplier在庫を確認"]
 
@@ -441,7 +441,7 @@
     I --> I3["Retailer discountはRetailer利益を減らす&lt;br/&gt;Supplier cost priceは変えない"]</pre>
         </div>
         <ul class="notes">
-          <li>在庫はSupplierの<code>sellableOnlineQuantity</code>から反映され、接続ストアに伝播します。</li>
+          <li>在庫はSupplierのオンライン販売可能在庫から反映され、接続ストアに伝播します。</li>
           <li>高トラフィック時は伝播遅延がありえますが、Shopify checkoutではSupplier在庫を確認します。</li>
           <li>Cost priceと在庫はSupplier起点、Retail priceと購入者向け送料は設定によりRetailer側で管理できます。</li>
         </ul>
@@ -571,7 +571,7 @@
           <pre class="mermaid">flowchart TD
     A["Supplierが商品、在庫、price list、retail price sync、送料を変更"] --> B{"変更種別"}
     B -->|"商品情報"| C["同期対象フィールドをRetailer商品へ反映"]
-    B -->|"在庫"| D["sellableOnlineQuantityをRetailer在庫へ反映"]
+    B -->|"在庫"| D["Supplierのオンライン販売可能在庫をRetailer在庫へ反映"]
     B -->|"Cost price / margin"| E["Supplier管理のcost priceを同期"]
     B -->|"Retail price"| F["Retail price syncがONならRetailer商品へ反映"]
     B -->|"Supplier shipping"| G["RetailerがSupplierへ支払う送料が将来注文で変わる"]
@@ -606,15 +606,15 @@
         <div class="faq-list">
           <article class="faq-item">
             <h3>サプライヤーのストアには、いつ注文データが作成されますか？</h3>
-            <p>Retailer注文が先に作成されます。支払い後、Collectiveは約2分間の不正チェックを待ち、注文が保留でなければSupplierへフルフィルメントリクエストを送り、Retailerのfulfillment orderとSupplier注文をリンクします。この時点でSupplierストアに注文が見えます。</p>
+            <p>Retailer注文が先に作成されます。支払い後、Collectiveは約2分間の不正チェックを待ち、注文が保留でなければSupplierへフルフィルメントリクエストを送り、Retailerのfulfillment orderとSupplier注文をリンクします。この時点でSupplierストアに注文が見えます。ERP、OMS、WMS、会計システムなど外部システムへ同期する場合は、対象ストアの注文作成・注文更新Webhookを起点にします。</p>
           </article>
           <article class="faq-item">
             <h3>サプライヤーの注文金額はどのように決定されますか？</h3>
-            <p>顧客のチェックアウト総額そのものではありません。Supplierのcost price、Retailerへ請求されるSupplier shipping、適用される税や調整によって決まります。正確な照合はSupplier注文、Retailer注文のnotes/custom attributes、Shopify Payments adjustmentで確認します。</p>
+            <p>顧客のチェックアウト総額そのものではありません。Supplierのcost price、Retailerへ請求されるSupplier shipping、適用される税や調整によって決まります。正確な照合はSupplier注文、Retailer注文の追加メモやカスタム情報、Shopify Payments adjustmentで確認します。外部の会計・ERPシステムでは、注文Webhookを変更フィードとして使い、最終的な資金移動はpayment adjustmentで照合します。</p>
           </article>
           <article class="faq-item">
             <h3>サプライヤーと小売の在庫の同期はどのように行われますか？</h3>
-            <p>Supplierの<code>sellableOnlineQuantity</code>がRetailerの利用可能在庫に反映されます。Supplierストアまたは接続Retailerストアで購入があると共有在庫が減り、接続ストアへ伝播します。Shopify checkoutではSupplier在庫も確認されます。</p>
+            <p>Supplierのオンライン販売可能在庫がRetailerの利用可能在庫に反映されます。Supplierストアまたは接続Retailerストアで購入があると共有在庫が減り、接続ストアへ伝播します。Shopify checkoutではSupplier在庫も確認されます。Retailer側のインポート商品を外部システムへ同期する場合は、商品作成・商品更新・商品削除Webhookを使います。</p>
           </article>
           <article class="faq-item">
             <h3>サプライヤーと小売で、在庫数が食い違うことはありますか？</h3>
@@ -622,15 +622,15 @@
           </article>
           <article class="faq-item">
             <h3>商品マスターは必ずサプライヤー側で登録しなければならないですか？</h3>
-            <p>Collectiveで共有するには、商品がSupplierのShopifyストアに存在し、ACTIVEで、Collective Supplierチャネルに公開され、price listに含まれている必要があります。ただし、上流のマスターはERPやPIMなど外部システムでも構いません。</p>
+            <p>Collectiveで共有するには、商品がSupplierのShopifyストアに存在し、ACTIVEで、Collective Supplierチャネルに公開され、price listに含まれている必要があります。ただし、上流のマスターはERPやPIMなど外部システムでも構いません。Retailer側にインポートされた後、その商品を下流システムへ同期する場合は商品Webhookを使います。</p>
           </article>
           <article class="faq-item">
             <h3>サプライヤーで商品データや価格、在庫を変更した場合、小売のデータはどうなりますか？</h3>
-            <p>在庫とcost priceはSupplierからRetailerへ継続同期されます。Retail priceは、Retailerが自分で管理するか、Supplierから同期するかを設定できます。title、description、media、categoryなどは、同期設定やproduct policyに応じてコピー・継続同期されます。</p>
+            <p>在庫とcost priceはSupplierからRetailerへ継続同期されます。Retail priceは、Retailerが自分で管理するか、Supplierから同期するかを設定できます。title、description、media、categoryなどは、同期設定やproduct policyに応じてコピー・継続同期されます。Retailer側の外部連携でこれらの変更を追従する場合は商品Webhookを使います。</p>
           </article>
           <article class="faq-item">
             <h3>小売で商品データや価格、在庫を変更した場合、サプライヤーのデータはどうなりますか？</h3>
-            <p>Retailer側の編集はSupplierの元商品を更新しません。Retailerはbuyer-facingなtitle、description、media、retail priceなどを編集できますが、Supplier管理フィールドはSupplier側が管理します。インポート商品の在庫はRetailer adminでは読み取り専用です。</p>
+            <p>Retailer側の編集はSupplierの元商品を更新しません。Retailerはbuyer-facingなtitle、description、media、retail priceなどを編集できますが、Supplier管理フィールドはSupplier側が管理します。インポート商品の在庫はRetailer adminでは読み取り専用です。Retailerストアに接続された外部システムは、商品WebhookをRetailer側の商品更新として扱い、Supplierの商品マスター変更とは区別します。</p>
           </article>
           <article class="faq-item">
             <h3>小売でディスカウントを設定した場合、サプライヤーの注文金額はどうなりますか？</h3>
@@ -638,7 +638,7 @@
           </article>
           <article class="faq-item">
             <h3>Shopify Paymentsを使って決済された注文の場合、サプライヤーに入金される金額とサプライヤーの注文金額は一致しますか？</h3>
-            <p>銀行入金として一対一に一致するとは限りません。Automatic PaymentsがONの場合、Supplierのフルフィルメント後にRetailer残高からdebitされ、Supplier残高へcreditされます。ただしpayoutは複数支払いを集約し、返金、返品、キャンセル、reversal、送料、税、partial fulfillment、タイミング、残高状況の影響を受けます。</p>
+            <p>銀行入金として一対一に一致するとは限りません。Automatic PaymentsがONの場合、Supplierのフルフィルメント後にRetailer残高からdebitされ、Supplier残高へcreditされます。ただしpayoutは複数支払いを集約し、返金、返品、キャンセル、reversal、送料、税、partial fulfillment、タイミング、残高状況の影響を受けます。外部会計システムでは注文Webhook、返品・返金Webhook、payment adjustmentの照合を組み合わせます。</p>
           </article>
         </div>
       </section>
@@ -652,9 +652,9 @@
           <span class="source-badge">Source + Shopify docs</span>
         </div>
         <div class="reference-grid">
-          <a href="../../../products/shopify-collective/architecture.md">Source Markdown<span>このページのローカルソース</span></a>
-          <a href="../../../products/shopify-collective/shopify-collective-architecture.pptx">English PPTX<span>Markdownソースから生成したスライド</span></a>
-          <a href="../../../products/shopify-collective/ja/shopify-collective-architecture-ja.pptx">Japanese PPTX<span>Markdownソースから生成した日本語スライド</span></a>
+          <a href="../architecture.md">Source Markdown<span>このページのローカルソース</span></a>
+          <a href="../shopify-collective-architecture.pptx">English PPTX<span>Markdownソースから生成したスライド</span></a>
+          <a href="./shopify-collective-architecture-ja.pptx">Japanese PPTX<span>Markdownソースから生成した日本語スライド</span></a>
           <a href="https://shopify.dev/docs/apps/build/collective">About Shopify Collective<span>Developer overview</span></a>
           <a href="https://shopify.dev/docs/apps/build/collective/products">Share and import products<span>商品インポート、同期、価格、在庫</span></a>
           <a href="https://shopify.dev/docs/apps/build/collective/shipping">Define shipping rates<span>Supplier送料と購入者向け送料</span></a>
@@ -668,7 +668,7 @@
     </main>
 
     <footer>
-      Rendered from <a href="../../../products/shopify-collective/architecture.md">products/shopify-collective/architecture.md</a>.
+      Rendered from <a href="../architecture.md">products/shopify-collective/architecture.md</a>.
     </footer>
 
     <script type="module">

@@ -17,9 +17,8 @@ The HTML site entry point is [`index.html`](./index.html). Product pages live in
 Rendered entry points:
 
 - [English site](./index.html)
-- [Japanese site](./ja/index.html)
 - [Shopify Collective English HTML](./products/shopify-collective/index.html)
-- [Shopify Collective Japanese HTML](./ja/products/shopify-collective/index.html)
+- [Shopify Collective Japanese HTML](./products/shopify-collective/ja/index.html)
 - [Shopify Collective English PPTX](./products/shopify-collective/shopify-collective-architecture.pptx)
 - [Shopify Collective Japanese PPTX](./products/shopify-collective/ja/shopify-collective-architecture-ja.pptx)
 
@@ -30,7 +29,7 @@ This repository is not official Shopify documentation. The maintainers do not ac
 ## Document Style
 
 - Use English for document text, headings, diagrams, and technical labels unless a Japanese version is explicitly requested.
-- Keep source Markdown in English. Rendered HTML uses English as the master output and Japanese pages under `/ja/` as localized output.
+- Keep source Markdown in English. Rendered HTML uses English as the master output and Japanese pages under each product directory's `ja/` folder as localized output.
 - Keep PPTX decks derived from the Markdown source. English decks live in the product directory, and Japanese decks live under the product directory's `ja/` folder with `-ja` before `.pptx`.
 - Keep each document focused on one Shopify product or product area.
 - Prefer Mermaid diagrams for architecture, sequence, and state-flow explanations.

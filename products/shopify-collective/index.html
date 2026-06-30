@@ -379,7 +379,7 @@
           <a href="./architecture.md">Source Markdown</a>
           <a href="./shopify-collective-architecture.pptx">PPTX</a>
           <a href="./ja/shopify-collective-architecture-ja.pptx">PPTX JA</a>
-          <a href="../../ja/products/shopify-collective/">日本語</a>
+          <a href="./ja/">日本語</a>
           <a href="#references">References</a>
         </div>
       </div>
@@ -449,7 +449,7 @@
     E --> F["Retailer publishes products to sales channels"]
 
     F --> G{"Inventory behavior"}
-    G --> G1["Retailer available quantity is populated from supplier sellableOnlineQuantity"]
+    G --> G1["Retailer available quantity is populated from supplier inventory available for online sales"]
     G --> G2["Purchases on supplier or connected retailer stores decrease shared available quantity"]
     G --> G3["Shopify checkout checks supplier inventory to protect against overselling"]
 
@@ -464,7 +464,7 @@
     I --> I3["Retailer discounts reduce retailer profit&lt;br/&gt;but do not change supplier cost price"]</pre>
         </div>
         <ul class="notes">
-          <li>Inventory is populated from supplier <code>sellableOnlineQuantity</code> and propagated across connected stores.</li>
+          <li>Inventory is populated from supplier inventory available for online sales and propagated across connected stores.</li>
           <li>Shopify checkout checks supplier inventory to help protect against overselling.</li>
           <li>Cost price and inventory are always supplier-synced; buyer-facing retail price and shipping can be retailer-managed depending on settings.</li>
         </ul>
@@ -610,7 +610,7 @@
     B -->|"Yes"| D["Supplier decides whether to accept or reject"]
     D -->|"Accept"| E["Supplier cancellation notification is sent"]
     E --> F["Retailer order is canceled or updated automatically"]
-    D -->|"Reject"| G["Retailer receives rejection webhook/notification"]
+    D -->|"Reject"| G["Retailer receives rejection through webhook or notification"]
 
     H["Supplier cancels before fulfillment"] --> I["Retailer order is canceled automatically"]
     I --> J["Refund happens automatically"]
@@ -654,7 +654,7 @@
     A["Supplier updates product, inventory, price list, retail price sync, or shipping settings"] --> B{"Change type"}
 
     B -->|"Content field"| C["Optional content sync updates retailer product&lt;br/&gt;title, description, media, category, SKU, barcode, weight, origin, HS code"]
-    B -->|"Inventory"| D["sellableOnlineQuantity updates retailer available inventory"]
+    B -->|"Inventory"| D["Supplier inventory available for online sales updates retailer available inventory"]
     B -->|"Cost price / retailer margin"| E["Supplier-controlled cost price syncs to retailer product"]
     B -->|"Retail price"| K["Retail price updates retailer product&lt;br/&gt;when retail price sync is enabled"]
     B -->|"Supplier shipping rate"| F["Retailer-to-supplier shipping amount changes for future orders"]
@@ -695,15 +695,15 @@
         <div class="faq-list">
           <article class="faq-item">
             <h3>When is order data created in the supplier store?</h3>
-            <p>The retailer order is created first. After payment, Collective waits about 2 minutes for fraud checks. If the order is not on hold, Collective sends the fulfillment request to the supplier, links the retailer fulfillment order with the supplier order, and the supplier sees the order in Shopify admin.</p>
+            <p>The retailer order is created first. After payment, Collective waits about 2 minutes for fraud checks. If the order is not on hold, Collective sends the fulfillment request to the supplier, links the retailer fulfillment order with the supplier order, and the supplier sees the order in Shopify admin. External ERP, OMS, WMS, or finance sync should use order creation and order update webhooks on the relevant store.</p>
           </article>
           <article class="faq-item">
             <h3>How is the supplier order amount determined?</h3>
-            <p>The supplier-side amount is based on supplier cost price, supplier shipping cost charged to the retailer, and applicable taxes or adjustments. It is not the customer's full checkout total. Validate exact amounts from supplier orders, order notes or custom attributes, and Shopify Payments adjustments.</p>
+            <p>The supplier-side amount is based on supplier cost price, supplier shipping cost charged to the retailer, and applicable taxes or adjustments. It is not the customer's full checkout total. Validate exact amounts from supplier orders, order notes or custom details, and Shopify Payments adjustments. External finance or ERP systems should use order webhooks as the change feed, then reconcile against payment adjustment records.</p>
           </article>
           <article class="faq-item">
             <h3>How is inventory synchronized between supplier and retailer?</h3>
-            <p>Supplier <code>sellableOnlineQuantity</code> populates retailer available inventory. Purchases on the supplier store or connected retailer stores decrease the shared quantity, and Shopify checkout checks supplier inventory during checkout.</p>
+            <p>Supplier inventory available for online sales populates retailer available inventory. Purchases on the supplier store or connected retailer stores decrease the shared quantity, and Shopify checkout checks supplier inventory during checkout. External systems that mirror imported retailer products should use product creation, update, and deletion webhooks.</p>
           </article>
           <article class="faq-item">
             <h3>Can supplier and retailer inventory quantities diverge?</h3>
@@ -711,15 +711,15 @@
           </article>
           <article class="faq-item">
             <h3>Must product master data always be registered on the supplier side?</h3>
-            <p>The product must exist in the supplier Shopify store, be active, be published to the Collective Supplier channel, and be included in a Collective price list. The upstream source can still be an ERP, PIM, or other external system.</p>
+            <p>The product must exist in the supplier Shopify store, be active, be published to the Collective Supplier channel, and be included in a Collective price list. The upstream source can still be an ERP, PIM, or other external system. After retailer import, downstream retailer systems can use product creation, update, and deletion webhooks.</p>
           </article>
           <article class="faq-item">
             <h3>What happens to retailer data if the supplier changes product data, price, or inventory?</h3>
-            <p>Inventory and cost price are continuously synced from the supplier. Retail price follows the supplier only when retail price sync is enabled. Other product details can be copied and optionally kept in sync depending on product policy and sync settings.</p>
+            <p>Inventory and cost price are continuously synced from the supplier. Retail price follows the supplier only when retail price sync is enabled. Other product details can be copied and optionally kept in sync depending on product policy and sync settings. Retailer-side integrations should use product webhooks when they need to mirror those changes externally.</p>
           </article>
           <article class="faq-item">
             <h3>What happens to supplier data if the retailer changes product data, price, or inventory?</h3>
-            <p>Retailer-side edits do not update the supplier source product. Retailers can edit buyer-facing details such as retail price, title, description, and media, but supplier-managed fields remain controlled by the supplier and some edits can be overwritten by supplier updates.</p>
+            <p>Retailer-side edits do not update the supplier source product. Retailers can edit buyer-facing details such as retail price, title, description, and media, but supplier-managed fields remain controlled by the supplier and some edits can be overwritten by supplier updates. External systems connected to the retailer store should treat product webhooks as retailer-store updates, not supplier master-data changes.</p>
           </article>
           <article class="faq-item">
             <h3>What happens to the supplier order amount if the retailer configures a discount?</h3>
@@ -727,7 +727,7 @@
           </article>
           <article class="faq-item">
             <h3>For orders paid with Shopify Payments, does the amount deposited to the supplier match the supplier order amount?</h3>
-            <p>Not always as a one-to-one bank deposit. Automatic payments debit the retailer balance and credit the supplier balance after fulfillment, but payouts can aggregate multiple payments and be affected by refunds, returns, cancellations, reversals, shipping, taxes, timing, and balance behavior.</p>
+            <p>Not always as a one-to-one bank deposit. Automatic payments debit the retailer balance and credit the supplier balance after fulfillment, but payouts can aggregate multiple payments and be affected by refunds, returns, cancellations, reversals, shipping, taxes, timing, and balance behavior. External finance systems should combine order webhooks, return/refund webhooks, and payment adjustment reconciliation.</p>
           </article>
         </div>
       </section>

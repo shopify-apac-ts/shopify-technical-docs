@@ -20,9 +20,9 @@ This repository is a source-first documentation library for Shopify product arch
 - English HTML is the master visualization output.
 - PPTX decks are also visualization outputs derived from the Markdown source.
 - Whenever a source Markdown file changes, regenerate or manually update the corresponding English HTML visualization in the same task.
-- Whenever a source Markdown file changes, also regenerate or manually update the corresponding Japanese HTML visualization under `/ja/` in the same task.
+- Whenever a source Markdown file changes, also regenerate or manually update the corresponding Japanese HTML visualization under the product directory's `ja/` folder in the same task.
 - Whenever a source Markdown file changes, regenerate or manually update the corresponding English and Japanese PPTX visualizations in the same task when that product has PPTX outputs.
-- Whenever HTML visualization pages are created or materially changed, also create or update the Japanese HTML version under a `/ja/` path.
+- Whenever HTML visualization pages are created or materially changed, also create or update the Japanese HTML version under the product directory's `ja/` path.
 - Keep Japanese HTML as a localized output derived from the English Markdown source and English master HTML, not as an independent source of truth.
 - Keep PPTX decks as localized outputs derived from the English Markdown source, not as independent sources of truth.
 
@@ -33,7 +33,7 @@ This repository is a source-first documentation library for Shopify product arch
 - Each product directory should contain the English Markdown source, such as `architecture.md`, and the English visualization page, such as `index.html`.
 - English PPTX decks should live directly under the product directory.
 - Japanese PPTX decks should live under `products/<product-slug>/ja/` and include `-ja` at the end of the filename before `.pptx`.
-- Japanese visualization pages should be accessible under `ja/`, mirroring the English page structure where practical, such as `ja/products/<product-slug>/index.html`.
+- Japanese visualization pages should be accessible under each product directory's language folder, such as `products/<product-slug>/ja/index.html`.
 - Each HTML visualization page must link back to its source Markdown file.
 - Update `README.md` when product documents are added, moved, renamed, or materially reorganized.
 
