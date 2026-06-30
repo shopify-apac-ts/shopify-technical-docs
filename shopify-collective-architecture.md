@@ -294,3 +294,7 @@ Notes:
 - [Cancel orders](https://shopify.dev/docs/apps/build/collective/cancellations)
 - [Handle returns](https://shopify.dev/docs/apps/build/collective/returns)
 - [Build an ERP integration for Shopify Collective](https://shopify.dev/docs/apps/build/collective/erp-integration-tutorial)
+- [Shopify Collective Help Center overview](https://help.shopify.com/en/manual/online-sales-channels/shopify-collective/index)
+- [Shopify Collective for suppliers](https://help.shopify.com/en/manual/online-sales-channels/shopify-collective/suppliers/index)
+- [Shopify Collective for retailers](https://help.shopify.com/en/manual/online-sales-channels/shopify-collective/retailers/index)
+- [Requirements and considerations for using the Shopify Collective app](https://help.shopify.com/en/manual/online-sales-channels/shopify-collective/retailers/requirements-and-considerations)
