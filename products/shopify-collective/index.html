@@ -804,6 +804,10 @@
             <h3>For orders paid with Shopify Payments, does the amount deposited to the supplier match the supplier order amount?</h3>
             <p>Not always as a one-to-one bank deposit. Automatic payments debit the retailer balance and credit the supplier balance after fulfillment, but payouts can aggregate multiple payments and be affected by refunds, returns, cancellations, reversals, shipping, taxes, timing, and balance behavior. External finance systems should combine order webhooks, return/refund webhooks, and payment adjustment reconciliation.</p>
           </article>
+          <article class="faq-item">
+            <h3>What changes in order data and operations when an order is paid with Shopify Payments versus another payment method?</h3>
+            <p>The customer payment gateway does not change the core order flow by itself: the retailer order is created first, and Collective creates or links the supplier order and fulfillment request after payment and fraud checks. The operational difference is Automatic Payments. When Automatic Payments handle the supplier payment, Shopify Payments balance debit and credit operations are recorded and should be reconciled through payment adjustments. If Automatic Payments are off or the order is not handled through automated payments, the order and fulfillment records can still exist, but supplier payment remains a manual or pending reconciliation item outside those balance adjustments.</p>
+          </article>
         </div>
       </section>
 

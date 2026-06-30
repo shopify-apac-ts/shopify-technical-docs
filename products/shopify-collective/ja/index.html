@@ -770,6 +770,10 @@
             <h3>Shopify Paymentsを使って決済された注文の場合、サプライヤーに入金される金額とサプライヤーの注文金額は一致しますか？</h3>
             <p>銀行入金として一対一に一致するとは限りません。Automatic PaymentsがONの場合、サプライヤーのフルフィルメント後に小売業者残高からdebitされ、サプライヤー残高へcreditされます。ただしpayoutは複数支払いを集約し、返金、返品、キャンセル、reversal、送料、税、partial fulfillment、タイミング、残高状況の影響を受けます。外部会計システムでは注文Webhook、返品・返金Webhook、payment adjustmentの照合を組み合わせます。</p>
           </article>
+          <article class="faq-item">
+            <h3>Shopify Paymentsを使って決済した場合と、しなかった場合に、注文データやオペレーションにどのような違いがありますか？</h3>
+            <p>顧客の決済ゲートウェイだけで注文データの基本フローは変わりません。小売業者注文が先に作成され、支払い・不正チェック後にCollectiveがサプライヤー注文とfulfillment requestを作成またはリンクします。差分はAutomatic Paymentsです。Automatic Paymentsの対象として処理される場合、Shopify Payments残高のdebit / credit operationが記録され、payment adjustmentで照合します。Automatic PaymentsがOFF、または自動支払い対象外の場合、注文・fulfillmentデータは存在しても、その自動debit / creditは発生せず、サプライヤー支払いはmanualまたはpendingの照合項目として別途精算します。</p>
+          </article>
         </div>
       </section>
 
