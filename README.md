@@ -14,6 +14,10 @@ The goal is to collect product-specific architecture notes, integration behavior
 
 The HTML site entry point is [`index.html`](./index.html). Product pages live in product-specific directories, and each HTML page links back to the Markdown source used to build the visualization.
 
+## Disclaimer
+
+This repository is not official Shopify documentation. The maintainers do not accept responsibility for the accuracy, completeness, or consequences of using this content. Use it at your own discretion as supplemental material for understanding Shopify concepts and workflows. Content may change without notice.
+
 ## Document Style
 
 - Use English for document text, headings, diagrams, and technical labels unless a Japanese version is explicitly requested.
