@@ -208,21 +208,83 @@
       }
 
       .diagram-wrap {
+        position: relative;
         overflow-x: auto;
         margin: 18px 0 0;
         border: 1px solid var(--line);
         border-radius: 8px;
         background: #ffffff;
         padding: 18px;
+        scroll-behavior: smooth;
+      }
+
+      .diagram-tools {
+        position: sticky;
+        top: 0;
+        left: 0;
+        z-index: 2;
+        display: flex;
+        justify-content: flex-end;
+        width: 100%;
+        margin-bottom: 10px;
+        pointer-events: none;
+      }
+
+      .diagram-toggle {
+        pointer-events: auto;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.92);
+        color: var(--ink);
+        padding: 7px 12px;
+        font: inherit;
+        font-size: 13px;
+        font-weight: 800;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(23, 34, 27, 0.08);
+      }
+
+      .diagram-toggle:hover {
+        border-color: var(--green);
+        color: var(--green);
       }
 
       .mermaid {
         min-width: 1100px;
+        width: max-content;
+        margin: 0;
         font-size: 18px;
       }
 
       .mermaid svg {
-        max-width: none;
+        display: block;
+        width: auto !important;
+        max-width: none !important;
+        height: auto !important;
+      }
+
+      .diagram-wrap.is-expanded {
+        position: fixed;
+        inset: 18px;
+        z-index: 100;
+        margin: 0;
+        padding: 58px 24px 24px;
+        border-color: var(--green);
+        box-shadow: 0 22px 60px rgba(23, 34, 27, 0.24);
+        max-height: none;
+      }
+
+      .diagram-wrap.is-expanded .diagram-tools {
+        position: fixed;
+        top: 30px;
+        right: 32px;
+        left: auto;
+        width: auto;
+        margin: 0;
+      }
+
+      body.has-expanded-diagram {
+        overflow: hidden;
       }
 
       .notes,
@@ -680,9 +742,16 @@
       import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs";
 
       mermaid.initialize({
-        startOnLoad: true,
+        startOnLoad: false,
         securityLevel: "loose",
         theme: "base",
+        flowchart: {
+          htmlLabels: true,
+          useMaxWidth: false
+        },
+        sequence: {
+          useMaxWidth: false
+        },
         themeVariables: {
           primaryColor: "#e2f3eb",
           primaryTextColor: "#17221b",
@@ -694,6 +763,95 @@
           fontFamily: "Noto Sans JP, Inter, ui-sans-serif, system-ui, sans-serif"
         }
       });
+
+      const diagramLabels = {
+        expand: "拡大表示",
+        close: "閉じる"
+      };
+
+      function setExpandedDiagram(wrap, expanded) {
+        document.querySelectorAll(".diagram-wrap.is-expanded").forEach((openWrap) => {
+          if (openWrap !== wrap) {
+            openWrap.classList.remove("is-expanded");
+            const openButton = openWrap.querySelector(".diagram-toggle");
+            if (openButton) {
+              openButton.textContent = diagramLabels.expand;
+              openButton.setAttribute("aria-expanded", "false");
+            }
+          }
+        });
+
+        wrap.classList.toggle("is-expanded", expanded);
+        document.body.classList.toggle("has-expanded-diagram", expanded);
+
+        const button = wrap.querySelector(".diagram-toggle");
+        if (button) {
+          button.textContent = expanded ? diagramLabels.close : diagramLabels.expand;
+          button.setAttribute("aria-expanded", expanded ? "true" : "false");
+        }
+
+        if (expanded) {
+          requestAnimationFrame(() => {
+            wrap.scrollLeft = Math.max(0, (wrap.scrollWidth - wrap.clientWidth) / 2);
+          });
+        }
+      }
+
+      function addDiagramControls(wrap) {
+        if (wrap.querySelector(".diagram-tools")) return;
+
+        const tools = document.createElement("div");
+        tools.className = "diagram-tools";
+
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "diagram-toggle";
+        button.textContent = diagramLabels.expand;
+        button.setAttribute("aria-expanded", "false");
+
+        button.addEventListener("click", () => {
+          setExpandedDiagram(wrap, !wrap.classList.contains("is-expanded"));
+        });
+
+        tools.append(button);
+        wrap.prepend(tools);
+      }
+
+      function sizeMermaidDiagrams() {
+        document.querySelectorAll(".diagram-wrap").forEach((wrap) => {
+          addDiagramControls(wrap);
+
+          const mermaidBlock = wrap.querySelector(".mermaid");
+          const svg = wrap.querySelector(".mermaid svg");
+          const viewBox = svg && svg.viewBox ? svg.viewBox.baseVal : null;
+
+          if (!mermaidBlock || !svg || !viewBox || !viewBox.width) return;
+
+          const naturalWidth = Math.ceil(viewBox.width);
+          const displayWidth = Math.max(naturalWidth, 1180);
+          svg.style.width = `${displayWidth}px`;
+          svg.style.maxWidth = "none";
+          svg.style.height = "auto";
+          mermaidBlock.style.width = `${displayWidth}px`;
+          mermaidBlock.style.minWidth = `${displayWidth}px`;
+
+          requestAnimationFrame(() => {
+            if (wrap.scrollWidth > wrap.clientWidth + 16 && !wrap.dataset.initialScrollSet) {
+              wrap.scrollLeft = Math.max(0, (wrap.scrollWidth - wrap.clientWidth) / 2);
+              wrap.dataset.initialScrollSet = "true";
+            }
+          });
+        });
+      }
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+          const openWrap = document.querySelector(".diagram-wrap.is-expanded");
+          if (openWrap) setExpandedDiagram(openWrap, false);
+        }
+      });
+
+      mermaid.run({ querySelector: ".mermaid" }).then(sizeMermaidDiagrams);
     </script>
   </body>
 </html>
