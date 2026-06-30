@@ -8,7 +8,7 @@ The goal is to collect product-specific architecture notes, integration behavior
 
 | Document | Shopify product | Coverage |
 | --- | --- | --- |
-| [Shopify Collective Architecture](./shopify-collective-architecture.md) | Shopify Collective | End-to-end connection, product sync, order routing, automatic payments, fulfillment, and returns flows. |
+| [Shopify Collective Architecture](./shopify-collective-architecture.md) | Shopify Collective | Retailer and supplier flows for product import, price and inventory sync, shipping, orders, automatic payments, fulfillment, cancellations, returns, and pricing-related changes. |
 
 ## Document Style
 
