@@ -8,7 +8,11 @@ The goal is to collect product-specific architecture notes, integration behavior
 
 | Document | Shopify product | Coverage |
 | --- | --- | --- |
-| [Shopify Collective Architecture](./shopify-collective-architecture.md) | Shopify Collective | Retailer and supplier flows for product import, price and inventory sync, shipping, orders, automatic payments, fulfillment, cancellations, returns, and pricing-related changes. |
+| [Shopify Collective Architecture](./products/shopify-collective/architecture.md) | Shopify Collective | Retailer and supplier flows for product import, price and inventory sync, shipping, orders, automatic payments, fulfillment, cancellations, returns, and pricing-related changes. |
+
+## GitHub Pages
+
+The HTML site entry point is [`index.html`](./index.html). Product pages live in product-specific directories, and each HTML page links back to the Markdown source used to build the visualization.
 
 ## Document Style
 

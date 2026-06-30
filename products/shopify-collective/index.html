@@ -1,0 +1,674 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Shopify Collective Architecture</title>
+    <meta name="description" content="Visualized Shopify Collective architecture and process flows for retailers and suppliers.">
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #17221b;
+        --muted: #596660;
+        --line: #d8dfda;
+        --paper: #f7f8f5;
+        --surface: #ffffff;
+        --green: #008060;
+        --green-soft: #e2f3eb;
+        --blue: #235d8f;
+        --blue-soft: #e7f0f8;
+        --red-soft: #fbeae5;
+        --yellow: #ffd66b;
+        --code: #24312a;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: var(--paper);
+        color: var(--ink);
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        line-height: 1.55;
+      }
+
+      a {
+        color: var(--green);
+        text-decoration-thickness: 0.08em;
+        text-underline-offset: 0.18em;
+      }
+
+      .topbar {
+        border-bottom: 1px solid var(--line);
+        background: var(--surface);
+      }
+
+      .topbar-inner,
+      .hero-inner,
+      main,
+      footer {
+        width: min(1180px, calc(100% - 32px));
+        margin: 0 auto;
+      }
+
+      .topbar-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        min-height: 64px;
+        gap: 16px;
+      }
+
+      .crumbs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .top-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        font-size: 14px;
+      }
+
+      .hero {
+        border-bottom: 1px solid var(--line);
+        background:
+          linear-gradient(135deg, rgba(0, 128, 96, 0.12), rgba(35, 93, 143, 0.1)),
+          var(--surface);
+      }
+
+      .hero-inner {
+        display: grid;
+        grid-template-columns: minmax(0, 1.25fr) minmax(300px, 0.75fr);
+        gap: 32px;
+        padding: 56px 0;
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        width: fit-content;
+        border-radius: 999px;
+        padding: 4px 10px;
+        background: var(--green-soft);
+        color: #115f47;
+        font-size: 12px;
+        font-weight: 800;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        max-width: 780px;
+        margin: 18px 0 18px;
+        font-size: clamp(38px, 6vw, 72px);
+        line-height: 0.96;
+        letter-spacing: 0;
+      }
+
+      .hero p {
+        max-width: 760px;
+        margin: 0;
+        color: var(--muted);
+        font-size: 18px;
+      }
+
+      .summary-panel {
+        align-self: stretch;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.84);
+        padding: 20px;
+      }
+
+      .summary-panel h2 {
+        margin: 0 0 14px;
+        font-size: 18px;
+      }
+
+      .summary-list {
+        display: grid;
+        gap: 10px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .summary-list li {
+        display: grid;
+        grid-template-columns: 24px 1fr;
+        gap: 10px;
+        align-items: start;
+        color: var(--muted);
+      }
+
+      .marker {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 24px;
+        height: 24px;
+        border-radius: 7px;
+        background: var(--blue-soft);
+        color: var(--blue);
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      main {
+        padding: 40px 0 56px;
+      }
+
+      .section {
+        margin: 0 0 32px;
+        padding: 28px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--surface);
+      }
+
+      .section-header {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 18px;
+        align-items: start;
+        margin-bottom: 18px;
+      }
+
+      h2 {
+        margin: 0;
+        font-size: clamp(26px, 4vw, 40px);
+        line-height: 1.05;
+        letter-spacing: 0;
+      }
+
+      h3 {
+        margin: 24px 0 10px;
+        font-size: 20px;
+        letter-spacing: 0;
+      }
+
+      .section-lede {
+        max-width: 820px;
+        margin: 12px 0 0;
+        color: var(--muted);
+      }
+
+      .source-badge {
+        display: inline-flex;
+        width: fit-content;
+        align-items: center;
+        white-space: nowrap;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 6px 10px;
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      .diagram-wrap {
+        overflow-x: auto;
+        margin: 18px 0 0;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #ffffff;
+        padding: 18px;
+      }
+
+      .mermaid {
+        min-width: 720px;
+      }
+
+      .notes {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 12px;
+        margin: 18px 0 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .notes li {
+        border-left: 4px solid var(--green);
+        border-radius: 8px;
+        background: var(--green-soft);
+        padding: 12px 14px;
+        color: #244238;
+      }
+
+      .terms {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 12px;
+        margin-top: 18px;
+      }
+
+      .term {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #ffffff;
+        padding: 14px;
+      }
+
+      .term strong {
+        display: block;
+        margin-bottom: 6px;
+      }
+
+      .term span {
+        color: var(--muted);
+      }
+
+      .reference-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 12px;
+        margin-top: 18px;
+      }
+
+      .reference-grid a {
+        display: block;
+        min-height: 72px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #ffffff;
+        padding: 14px;
+        color: var(--ink);
+        text-decoration: none;
+      }
+
+      .reference-grid span {
+        display: block;
+        margin-top: 4px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+
+      code {
+        border-radius: 6px;
+        background: #eef2ee;
+        color: var(--code);
+        padding: 0.1em 0.35em;
+      }
+
+      footer {
+        padding: 32px 0 48px;
+        border-top: 1px solid var(--line);
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      @media (max-width: 860px) {
+        .topbar-inner,
+        .hero-inner,
+        .section-header {
+          grid-template-columns: 1fr;
+        }
+
+        .topbar-inner {
+          align-items: flex-start;
+          flex-direction: column;
+          padding: 16px 0;
+        }
+
+        .hero-inner {
+          padding: 40px 0;
+        }
+
+        .section {
+          padding: 20px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="topbar-inner">
+        <nav class="crumbs" aria-label="Breadcrumb">
+          <a href="../../">Shopify Technical Docs</a>
+          <span>/</span>
+          <span>Shopify Collective</span>
+        </nav>
+        <div class="top-actions">
+          <a href="./architecture.md">Source Markdown</a>
+          <a href="#references">References</a>
+        </div>
+      </div>
+    </header>
+
+    <section class="hero" aria-labelledby="page-title">
+      <div class="hero-inner">
+        <div>
+          <span class="eyebrow">Architecture</span>
+          <h1 id="page-title">Shopify Collective flows for retailers and suppliers</h1>
+          <p>
+            Visual overview of product sharing, import, inventory and price sync, shipping, order routing, automatic payments, cancellations, returns, and pricing-related changes.
+          </p>
+        </div>
+        <aside class="summary-panel" aria-label="Source model">
+          <h2>Source-first model</h2>
+          <ul class="summary-list">
+            <li><span class="marker">1</span><span><strong>Primary source:</strong> <a href="./architecture.md">architecture.md</a></span></li>
+            <li><span class="marker">2</span><span><strong>Rendered view:</strong> this GitHub Pages HTML page</span></li>
+            <li><span class="marker">3</span><span><strong>Scope:</strong> merchant-visible and integration workflow behavior</span></li>
+            <li><span class="marker">4</span><span><strong>Boundary:</strong> no Shopify internal implementation details</span></li>
+          </ul>
+        </aside>
+      </div>
+    </section>
+
+    <main>
+      <section class="section" aria-labelledby="terms">
+        <div class="section-header">
+          <div>
+            <h2 id="terms">Terms</h2>
+            <p class="section-lede">The product page uses the same role definitions as the source Markdown.</p>
+          </div>
+          <span class="source-badge">Source: architecture.md</span>
+        </div>
+        <div class="terms">
+          <div class="term"><strong>Supplier</strong><span>Owns source products, shares them through Collective, and fulfills orders directly to the end customer.</span></div>
+          <div class="term"><strong>Retailer</strong><span>Imports supplier products, sells them on its storefront, and handles the customer relationship.</span></div>
+          <div class="term"><strong>Price list / catalog</strong><span>Supplier-managed products and commercial terms shared with retailers.</span></div>
+          <div class="term"><strong>Automatic payments</strong><span>Collective can debit retailer Shopify Payments and credit supplier Shopify Payments when enabled.</span></div>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="import">
+        <div class="section-header">
+          <div>
+            <h2 id="import">1. Retailer product import and publication</h2>
+            <p class="section-lede">Retailers import supplier products from price lists, publish them to sales channels, and rely on Collective for supplier-backed inventory and price synchronization.</p>
+          </div>
+          <span class="source-badge">Products + Shipping</span>
+        </div>
+        <div class="diagram-wrap">
+          <pre class="mermaid">flowchart TD
+    A["Retailer opens the Collective app"] --> B["Browse connected supplier price lists"]
+    B --> C["Select products to import&lt;br/&gt;or apply import policies"]
+    C --> D["Collective creates products in the retailer store&lt;br/&gt;with Shopify Collective and supplier tags"]
+    D --> E["Supplier content is copied&lt;br/&gt;title, description, media, category, SKU, barcode, weight, origin, HS code"]
+    E --> F["Retailer publishes products to sales channels"]
+
+    F --> G{"Inventory behavior"}
+    G --> G1["Retailer available quantity is populated from supplier sellableOnlineQuantity"]
+    G --> G2["Purchases on supplier or connected retailer stores decrease shared available quantity"]
+    G --> G3["Shopify checkout checks supplier inventory to protect against overselling"]
+
+    F --> H{"Shipping behavior"}
+    H --> H1["Imported products default to the Shopify Collective shipping profile"]
+    H --> H2["Collective Carrier Service can return the same rates&lt;br/&gt;the supplier charges the retailer"]
+    H --> H3["Retailer can move products to another shipping profile&lt;br/&gt;and define buyer-facing shipping rates"]
+
+    F --> I{"Price behavior"}
+    I --> I1["Supplier price list price is synced to the retailer store"]
+    I --> I2["Direct retailer edits to synced price are reverted to the supplier price"]</pre>
+        </div>
+        <ul class="notes">
+          <li>Inventory is populated from supplier <code>sellableOnlineQuantity</code> and propagated across connected stores.</li>
+          <li>Shopify checkout checks supplier inventory to help protect against overselling.</li>
+          <li>Retailers can customize buyer-facing shipping by moving products to another shipping profile.</li>
+        </ul>
+      </section>
+
+      <section class="section" aria-labelledby="supplier-listing">
+        <div class="section-header">
+          <div>
+            <h2 id="supplier-listing">2. Supplier listing flow</h2>
+            <p class="section-lede">Suppliers publish products to the Collective channel, create price lists, configure shipping, and share access with retailers.</p>
+          </div>
+          <span class="source-badge">Supplier flow</span>
+        </div>
+        <div class="diagram-wrap">
+          <pre class="mermaid">flowchart TD
+    A["Supplier installs and opens the Collective app"] --> B{"Eligibility and setup checks&lt;br/&gt;Shopify Payments, plan, region, currency, app setup"}
+    B -->|"Not eligible"| X["Cannot list until requirements are met"]
+    B -->|"Eligible"| C["Create or sync products in Shopify"]
+    C --> D["Set product status to ACTIVE"]
+    D --> E["Publish products to the Collective Supplier sales channel"]
+    E --> F["Create Collective price list in the admin/app"]
+    F --> G["Set shared products and commercial terms"]
+    F --> H["Set supplier shipping rates&lt;br/&gt;calculated rates or flat rate"]
+    F --> I{"Choose access model"}
+    I --> I1["Open access"]
+    I --> I2["Closed access"]
+    G --> J["Share price list with retailers"]
+    H --> J
+    I --> J
+    J --> K["Retailers can import products after access is granted"]</pre>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="connections">
+        <div class="section-header">
+          <div>
+            <h2 id="connections">3. Retailer and supplier connection models</h2>
+            <p class="section-lede">The connection and price list relationship is the integration boundary; invitations are managed through Collective apps.</p>
+          </div>
+          <span class="source-badge">Connection model</span>
+        </div>
+        <div class="diagram-wrap">
+          <pre class="mermaid">flowchart LR
+    subgraph PUB["Public / Open access"]
+      direction TB
+      P1["Supplier makes products discoverable"] --> P2["Retailer discovers supplier products"]
+      P2 --> P3["Retailer requests access or pricing"]
+      P3 --> P4["Supplier approves the request"]
+      P4 --> P5["Retailer imports products"]
+    end
+
+    subgraph PRI["Private / Closed access"]
+      direction TB
+      R1["Supplier or retailer sends an invitation"] --> R2["Invited merchant accepts"]
+      R2 --> R3["Access to shared price list is granted"]
+      R3 --> R4["Retailer imports products"]
+    end</pre>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="orders">
+        <div class="section-header">
+          <div>
+            <h2 id="orders">4. Retailer order flow</h2>
+            <p class="section-lede">After payment and fraud checks, Collective links retailer fulfillment orders with supplier orders and routes fulfillment to suppliers.</p>
+          </div>
+          <span class="source-badge">Orders + ERP</span>
+        </div>
+        <div class="diagram-wrap">
+          <pre class="mermaid">sequenceDiagram
+    participant Cust as Customer
+    participant Ret as Retailer Store
+    participant Checkout as Shopify Checkout
+    participant COL as Shopify Collective
+    participant Sup as Supplier Store
+    participant SP as Shopify Payments
+
+    Cust->>Ret: Start checkout
+    Ret->>Checkout: Submit cart with Collective products
+    Checkout->>COL: Check supplier inventory during checkout
+    alt Supplier inventory is unavailable
+        Checkout-->>Cust: Ask customer to adjust quantity or remove item
+    else Supplier inventory is available
+        Cust->>Ret: Place paid order
+        Ret-->>COL: Retailer order created with Shopify Collective tag
+        COL->>COL: Wait for payment and fraud checks&lt;br/&gt;about 2 minutes
+        COL->>Sup: Send fulfillment request and create linked supplier order
+        COL->>Ret: Add supplier tag and supplier order details to retailer order
+        COL->>SP: Debit retailer Shopify Payments account&lt;br/&gt;when Automatic Payments are ON
+    end
+
+    Note over Ret,Sup: Supplier fulfills directly to the end customer, not to the retailer.
+    Note over COL: Collective handles order splitting, payment routing, and shipping label generation for Collective items.</pre>
+        </div>
+        <ul class="notes">
+          <li>Retailer orders use the <code>Shopify Collective</code> tag and can include <code>{$supplier_name}</code>.</li>
+          <li>Supplier orders use the <code>Shopify Collective</code> and <code>{$retailer_name}</code> tags.</li>
+          <li>Suppliers are paid after fulfillment when Automatic Payments are enabled.</li>
+        </ul>
+      </section>
+
+      <section class="section" aria-labelledby="fulfillment">
+        <div class="section-header">
+          <div>
+            <h2 id="fulfillment">5. Supplier fulfillment and payout</h2>
+            <p class="section-lede">Suppliers fulfill directly to the customer. Collective syncs fulfillment and can credit supplier Shopify Payments after fulfillment.</p>
+          </div>
+          <span class="source-badge">Fulfillment</span>
+        </div>
+        <div class="diagram-wrap">
+          <pre class="mermaid">sequenceDiagram
+    participant Sup as Supplier Store
+    participant COL as Shopify Collective
+    participant Ret as Retailer Store
+    participant Cust as Customer
+    participant SP as Shopify Payments
+
+    COL->>Sup: Supplier order / fulfillment request is available
+    Sup->>Sup: Process order in Shopify, ERP, OMS, or WMS
+    Sup->>Sup: Create fulfillment and tracking details
+    Sup-->>COL: Fulfillment update
+    COL->>Ret: Sync fulfillment status and tracking to retailer order
+    Ret-->>Cust: Send customer-facing shipping notification if configured
+    COL->>SP: Credit supplier Shopify Payments account&lt;br/&gt;when Automatic Payments are ON
+
+    Note over COL,SP: For partial fulfillments, payment adjustments follow fulfilled items. Validate exact shipping and tax treatment from Shopify Payments adjustments.</pre>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="returns">
+        <div class="section-header">
+          <div>
+            <h2 id="returns">6. Cancellations, refunds, and returns</h2>
+            <p class="section-lede">Cancellation and return handling depends on payment state, fulfillment state, and the retailer return option.</p>
+          </div>
+          <span class="source-badge">Cancellations + Returns</span>
+        </div>
+        <h3>Cancellation flow</h3>
+        <div class="diagram-wrap">
+          <pre class="mermaid">flowchart TD
+    A["Retailer requests cancellation for supplier fulfillment order"] --> B{"Order paid?"}
+    B -->|"No"| C["Collective cancels automatically"]
+    B -->|"Yes"| D["Supplier decides whether to accept or reject"]
+    D -->|"Accept"| E["Supplier cancellation notification is sent"]
+    E --> F["Retailer order is canceled or updated automatically"]
+    D -->|"Reject"| G["Retailer receives rejection webhook/notification"]
+
+    H["Supplier cancels before fulfillment"] --> I["Retailer order is canceled automatically"]
+    I --> J["Refund happens automatically"]
+
+    K["Cancellation pending too long"] --> L["Order can be automatically canceled after 14 days&lt;br/&gt;if payment is still pending or the order has not shipped"]</pre>
+        </div>
+
+        <h3>Return handling options</h3>
+        <div class="diagram-wrap">
+          <pre class="mermaid">flowchart TD
+    A["Customer starts return on retailer store"] --> B{"Retailer return setting"}
+
+    B -->|"Retailer generates label"| C["Retailer return is approved"]
+    C --> D["Collective creates corresponding supplier return"]
+    D --> E["Supplier receives returned item and processes refund"]
+    E --> F["Collective restocks retailer return and closes it"]
+    F --> G{"Refund preference"}
+    G -->|"Automatically refund customer"| H["Collective processes customer refund"]
+    G -->|"Manual refund"| I["Retailer refunds customer after returns/close"]
+
+    B -->|"Supplier generates label"| J["Collective requests return from supplier"]
+    J --> K["Supplier approves return and uploads label"]
+    K --> L["Label syncs to retailer order and customer email"]
+    L --> E
+
+    B -->|"No action"| M["Collective does not manage supplier-side return"]
+    M --> N["Retailer manually refunds, restocks, and closes return as needed"]</pre>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="changes">
+        <div class="section-header">
+          <div>
+            <h2 id="changes">7. Price, product, inventory, and shipping changes</h2>
+            <p class="section-lede">Supplier-side product and price list changes can affect future orders. Retailer-controlled buyer shipping can change buyer charges without changing supplier settlement rates.</p>
+          </div>
+          <span class="source-badge">Change behavior</span>
+        </div>
+        <div class="diagram-wrap">
+          <pre class="mermaid">flowchart TD
+    A["Supplier updates product, inventory, price list, or shipping settings"] --> B{"Change type"}
+
+    B -->|"Content field"| C["Optional content sync updates retailer product&lt;br/&gt;title, description, media, category, SKU, barcode, weight, origin, HS code"]
+    B -->|"Inventory"| D["sellableOnlineQuantity updates retailer available inventory"]
+    B -->|"Price list price"| E["Supplier-controlled price syncs to retailer product"]
+    B -->|"Supplier shipping rate"| F["Retailer-to-supplier shipping amount changes for future orders"]
+
+    C --> G["Retailer product reflects synced supplier data when sync is enabled"]
+    D --> H["Connected stores receive updated available quantity"]
+    E --> I["Future orders use updated supplier price list terms"]
+    F --> I
+    I --> J["Existing paid orders keep order-time amounts and are adjusted only through order changes, cancellations, refunds, or returns"]</pre>
+        </div>
+        <div class="diagram-wrap">
+          <pre class="mermaid">flowchart TD
+    A["Retailer changes buyer-facing shipping setup"] --> B{"Shipping profile"}
+    B -->|"Default Shopify Collective profile"| C["Collective Carrier Service returns supplier-charged rates"]
+    B -->|"Custom retailer profile"| D["Retailer defines buyer-facing shipping rates"]
+    C --> E["Buyer shipping charge usually mirrors supplier-to-retailer shipping rate"]
+    D --> F["Buyer shipping charge can differ from supplier-to-retailer shipping rate"]
+    F --> G["Retailer shipping margin or subsidy changes"]
+
+    H["Retailer attempts direct product price edit"] --> I["Price is reverted to supplier price list value"]</pre>
+        </div>
+      </section>
+
+      <section class="section" id="references" aria-labelledby="references-title">
+        <div class="section-header">
+          <div>
+            <h2 id="references-title">References</h2>
+            <p class="section-lede">The Markdown source remains the primary source for this HTML page. External links point to Shopify developer docs and Help Center pages used by the source document.</p>
+          </div>
+          <span class="source-badge">Source + Shopify docs</span>
+        </div>
+        <div class="reference-grid">
+          <a href="./architecture.md">Source Markdown<span>Local source of truth for this rendered page</span></a>
+          <a href="https://shopify.dev/docs/apps/build/collective">About Shopify Collective<span>Developer overview</span></a>
+          <a href="https://shopify.dev/docs/apps/build/collective/products">Share and import products<span>Product import, content sync, price, and inventory</span></a>
+          <a href="https://shopify.dev/docs/apps/build/collective/shipping">Define shipping rates<span>Supplier and buyer shipping rates</span></a>
+          <a href="https://shopify.dev/docs/apps/build/collective/orders">Request and accept fulfillment orders<span>Order routing and automatic payments</span></a>
+          <a href="https://shopify.dev/docs/apps/build/collective/cancellations">Cancel orders<span>Retailer and supplier cancellation behavior</span></a>
+          <a href="https://shopify.dev/docs/apps/build/collective/returns">Handle returns<span>Return options and refund preferences</span></a>
+          <a href="https://shopify.dev/docs/apps/build/collective/erp-integration-tutorial">ERP integration tutorial<span>Integration responsibilities and order tags</span></a>
+          <a href="https://help.shopify.com/en/manual/online-sales-channels/shopify-collective/index">Help Center overview<span>Merchant-facing Collective overview</span></a>
+          <a href="https://help.shopify.com/en/manual/online-sales-channels/shopify-collective/suppliers/index">Collective for suppliers<span>Supplier-facing setup and workflows</span></a>
+          <a href="https://help.shopify.com/en/manual/online-sales-channels/shopify-collective/retailers/index">Collective for retailers<span>Retailer-facing setup and workflows</span></a>
+          <a href="https://help.shopify.com/en/manual/online-sales-channels/shopify-collective/retailers/requirements-and-considerations">Requirements and considerations<span>Eligibility, country, currency, and setup considerations</span></a>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      Rendered from <a href="./architecture.md">products/shopify-collective/architecture.md</a>.
+    </footer>
+
+    <script type="module">
+      import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs";
+
+      mermaid.initialize({
+        startOnLoad: true,
+        securityLevel: "loose",
+        theme: "base",
+        themeVariables: {
+          primaryColor: "#e2f3eb",
+          primaryTextColor: "#17221b",
+          primaryBorderColor: "#008060",
+          lineColor: "#596660",
+          secondaryColor: "#e7f0f8",
+          tertiaryColor: "#ffffff",
+          fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif"
+        }
+      });
+    </script>
+  </body>
+</html>
