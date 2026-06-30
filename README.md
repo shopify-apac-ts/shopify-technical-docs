@@ -25,18 +25,3 @@ Rendered entry points:
 ## Disclaimer
 
 This repository is not official Shopify documentation. The maintainers do not accept responsibility for the accuracy, completeness, or consequences of using this content. Use it at your own discretion as supplemental material for understanding Shopify concepts and workflows. Content may change without notice.
-
-## Document Style
-
-- Use English for document text, headings, diagrams, and technical labels unless a Japanese version is explicitly requested.
-- Keep source Markdown in English. Rendered HTML uses English as the master output and Japanese pages under each product directory's `ja/` folder as localized output.
-- Keep PPTX decks derived from the Markdown source. English decks live in the product directory, and Japanese decks live under the product directory's `ja/` folder with `-ja` before `.pptx`.
-- Keep each document focused on one Shopify product or product area.
-- Prefer Mermaid diagrams for architecture, sequence, and state-flow explanations.
-- Include links to relevant Shopify documentation when they help readers validate the behavior.
-
-## Visualization Conventions
-
-- Use `12px` as the standard Mermaid diagram font size in HTML outputs.
-- Apply the same `12px` sizing to sequence diagram actors, messages, notes, loop labels, and condition labels.
-- Keep English and Japanese HTML outputs substantively aligned; localized pages should not omit diagram labels, notes, or claims that appear in the English master output.
