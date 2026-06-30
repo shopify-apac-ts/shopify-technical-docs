@@ -263,6 +263,14 @@
         height: auto !important;
       }
 
+      .mermaid svg .actor,
+      .mermaid svg .messageText,
+      .mermaid svg .noteText,
+      .mermaid svg .loopText,
+      .mermaid svg .labelText {
+        font-size: 10px !important;
+      }
+
       .diagram-wrap.is-expanded {
         position: fixed;
         inset: 18px;
@@ -750,7 +758,10 @@
           useMaxWidth: false
         },
         sequence: {
-          useMaxWidth: false
+          useMaxWidth: false,
+          actorFontSize: 10,
+          messageFontSize: 10,
+          noteFontSize: 10
         },
         themeVariables: {
           primaryColor: "#e2f3eb",
