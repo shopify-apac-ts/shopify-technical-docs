@@ -22,6 +22,8 @@ Rendered entry points:
 - [Shopify Collective English PPTX](./products/shopify-collective/shopify-collective-architecture.pptx)
 - [Shopify Collective Japanese PPTX](./products/shopify-collective/ja/shopify-collective-architecture-ja.pptx)
 
+The GitHub Wiki also includes [Demo & Pages](../../wiki/Demo-&-Pages) (`wiki/Demo-&-Pages`), which collects demo videos and links to the rendered pages.
+
 ## Disclaimer
 
 This repository is not official Shopify documentation. The maintainers do not accept responsibility for the accuracy, completeness, or consequences of using this content. Use it at your own discretion as supplemental material for understanding Shopify concepts and workflows. Content may change without notice.
