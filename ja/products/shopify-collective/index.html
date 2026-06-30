@@ -1,0 +1,689 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Shopify Collective アーキテクチャ</title>
+    <meta name="description" content="Shopify Collectiveの小売・サプライヤーフローを日本語で可視化したページ。">
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #17221b;
+        --muted: #596660;
+        --line: #d8dfda;
+        --paper: #f7f8f5;
+        --surface: #ffffff;
+        --green: #008060;
+        --green-soft: #e2f3eb;
+        --blue: #235d8f;
+        --blue-soft: #e7f0f8;
+        --yellow: #ffd66b;
+        --code: #24312a;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: var(--paper);
+        color: var(--ink);
+        font-family: "Noto Sans JP", Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        line-height: 1.6;
+      }
+
+      a {
+        color: var(--green);
+        text-decoration-thickness: 0.08em;
+        text-underline-offset: 0.18em;
+      }
+
+      .topbar {
+        border-bottom: 1px solid var(--line);
+        background: var(--surface);
+      }
+
+      .topbar-inner,
+      .hero-inner,
+      main,
+      footer {
+        width: min(1180px, calc(100% - 32px));
+        margin: 0 auto;
+      }
+
+      .topbar-inner {
+        display: flex;
+        min-height: 64px;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+      }
+
+      .crumbs,
+      .top-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      .top-actions {
+        gap: 12px;
+      }
+
+      .hero {
+        border-bottom: 1px solid var(--line);
+        background:
+          linear-gradient(135deg, rgba(0, 128, 96, 0.12), rgba(35, 93, 143, 0.1)),
+          var(--surface);
+      }
+
+      .hero-inner {
+        display: grid;
+        grid-template-columns: minmax(0, 1.25fr) minmax(300px, 0.75fr);
+        gap: 32px;
+        padding: 56px 0;
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        width: fit-content;
+        border-radius: 999px;
+        padding: 4px 10px;
+        background: var(--green-soft);
+        color: #115f47;
+        font-size: 12px;
+        font-weight: 800;
+        text-transform: uppercase;
+      }
+
+      h1 {
+        max-width: 820px;
+        margin: 18px 0;
+        font-size: clamp(34px, 6vw, 64px);
+        line-height: 1.08;
+        letter-spacing: 0;
+      }
+
+      .hero p {
+        max-width: 760px;
+        margin: 0;
+        color: var(--muted);
+        font-size: 18px;
+      }
+
+      .summary-panel {
+        align-self: stretch;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.84);
+        padding: 20px;
+      }
+
+      .summary-panel h2 {
+        margin: 0 0 14px;
+        font-size: 18px;
+      }
+
+      .summary-list {
+        display: grid;
+        gap: 10px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .summary-list li {
+        display: grid;
+        grid-template-columns: 24px 1fr;
+        gap: 10px;
+        color: var(--muted);
+      }
+
+      .marker {
+        display: inline-flex;
+        width: 24px;
+        height: 24px;
+        align-items: center;
+        justify-content: center;
+        border-radius: 7px;
+        background: var(--blue-soft);
+        color: var(--blue);
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      main {
+        padding: 40px 0 56px;
+      }
+
+      .section {
+        margin: 0 0 32px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--surface);
+        padding: 28px;
+      }
+
+      .section-header {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 18px;
+        align-items: start;
+        margin-bottom: 18px;
+      }
+
+      h2 {
+        margin: 0;
+        font-size: clamp(25px, 4vw, 38px);
+        line-height: 1.18;
+        letter-spacing: 0;
+      }
+
+      h3 {
+        margin: 24px 0 10px;
+        font-size: 20px;
+        letter-spacing: 0;
+      }
+
+      .section-lede {
+        max-width: 820px;
+        margin: 12px 0 0;
+        color: var(--muted);
+      }
+
+      .source-badge {
+        display: inline-flex;
+        width: fit-content;
+        align-items: center;
+        white-space: nowrap;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 6px 10px;
+        color: var(--muted);
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      .diagram-wrap {
+        overflow-x: auto;
+        margin: 18px 0 0;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #ffffff;
+        padding: 18px;
+      }
+
+      .mermaid {
+        min-width: 720px;
+      }
+
+      .notes,
+      .terms,
+      .faq-list,
+      .reference-grid {
+        display: grid;
+        gap: 12px;
+        margin-top: 18px;
+      }
+
+      .notes {
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        padding: 0;
+        list-style: none;
+      }
+
+      .notes li {
+        border-left: 4px solid var(--green);
+        border-radius: 8px;
+        background: var(--green-soft);
+        padding: 12px 14px;
+        color: #244238;
+      }
+
+      .terms,
+      .reference-grid {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      }
+
+      .term,
+      .faq-item,
+      .reference-grid a {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #ffffff;
+        padding: 14px;
+      }
+
+      .term strong {
+        display: block;
+        margin-bottom: 6px;
+      }
+
+      .term span,
+      .faq-item p,
+      .reference-grid span {
+        color: var(--muted);
+      }
+
+      .faq-item h3 {
+        margin: 0 0 8px;
+        font-size: 18px;
+      }
+
+      .faq-item p {
+        margin: 0;
+      }
+
+      .reference-grid a {
+        display: block;
+        min-height: 72px;
+        color: var(--ink);
+        text-decoration: none;
+      }
+
+      .reference-grid span {
+        display: block;
+        margin-top: 4px;
+        font-size: 13px;
+      }
+
+      .disclaimer {
+        border: 1px solid #ead7a4;
+        border-left: 4px solid var(--yellow);
+        border-radius: 8px;
+        background: #fff7df;
+        padding: 18px 20px;
+      }
+
+      .disclaimer h2 {
+        margin: 0 0 8px;
+        font-size: 18px;
+      }
+
+      .disclaimer p {
+        margin: 0;
+        color: var(--muted);
+      }
+
+      code {
+        border-radius: 6px;
+        background: #eef2ee;
+        color: var(--code);
+        padding: 0.1em 0.35em;
+      }
+
+      footer {
+        border-top: 1px solid var(--line);
+        padding: 32px 0 48px;
+        color: var(--muted);
+        font-size: 14px;
+      }
+
+      @media (max-width: 860px) {
+        .topbar-inner,
+        .hero-inner,
+        .section-header {
+          grid-template-columns: 1fr;
+        }
+
+        .topbar-inner {
+          align-items: flex-start;
+          flex-direction: column;
+          padding: 16px 0;
+        }
+
+        .hero-inner {
+          padding: 40px 0;
+        }
+
+        .section {
+          padding: 20px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="topbar-inner">
+        <nav class="crumbs" aria-label="Breadcrumb">
+          <a href="../../">Shopify Technical Docs</a>
+          <span>/</span>
+          <span>Shopify Collective</span>
+        </nav>
+        <div class="top-actions">
+          <a href="../../../products/shopify-collective/">English</a>
+          <a href="../../../products/shopify-collective/architecture.md">Source Markdown</a>
+          <a href="#faq">FAQ</a>
+          <a href="#references">References</a>
+        </div>
+      </div>
+    </header>
+
+    <section class="hero" aria-labelledby="page-title">
+      <div class="hero-inner">
+        <div>
+          <span class="eyebrow">Architecture</span>
+          <h1 id="page-title">Shopify Collective 小売・サプライヤーフロー</h1>
+          <p>
+            商品共有、インポート、在庫・価格同期、配送、注文ルーティング、Automatic Payments、キャンセル、返品、価格変更を日本語で可視化します。
+          </p>
+        </div>
+        <aside class="summary-panel" aria-label="Source model">
+          <h2>ソース優先モデル</h2>
+          <ul class="summary-list">
+            <li><span class="marker">1</span><span><strong>ソース:</strong> <a href="../../../products/shopify-collective/architecture.md">architecture.md</a></span></li>
+            <li><span class="marker">2</span><span><strong>出力:</strong> GitHub Pages用HTML</span></li>
+            <li><span class="marker">3</span><span><strong>範囲:</strong> マーチャントに見える挙動と連携フロー</span></li>
+            <li><span class="marker">4</span><span><strong>境界:</strong> Shopify内部実装は含めない</span></li>
+          </ul>
+        </aside>
+      </div>
+    </section>
+
+    <main>
+      <section class="section" aria-labelledby="terms">
+        <div class="section-header">
+          <div>
+            <h2 id="terms">用語</h2>
+            <p class="section-lede">このページでは、英語Markdownソースと同じロール定義を使います。</p>
+          </div>
+          <span class="source-badge">Source: architecture.md</span>
+        </div>
+        <div class="terms">
+          <div class="term"><strong>Supplier</strong><span>商品を所有し、Collectiveで共有し、エンド顧客へ直接フルフィルメントするマーチャント。</span></div>
+          <div class="term"><strong>Retailer</strong><span>サプライヤー商品をインポートし、自ストアで販売し、顧客接点を持つマーチャント。</span></div>
+          <div class="term"><strong>Cost price</strong><span>Collective経由の販売で、小売がサプライヤーに支払う商品側の金額。</span></div>
+          <div class="term"><strong>Retail price</strong><span>小売ストアで購入者に表示・請求される商品価格。</span></div>
+        </div>
+      </section>
+
+      <section class="section disclaimer" aria-labelledby="disclaimer-title">
+        <h2 id="disclaimer-title">免責</h2>
+        <p>
+          このページはShopify公式ドキュメントではありません。内容の正確性、完全性、または利用によって生じる結果について、メンテナーは責任を負いません。Shopifyの概念やワークフローを理解するための補助資料として、自己責任でご利用ください。内容は通知なく変更される可能性があります。
+        </p>
+      </section>
+
+      <section class="section" aria-labelledby="import">
+        <div class="section-header">
+          <div>
+            <h2 id="import">1. 商品インポートと公開</h2>
+            <p class="section-lede">小売はサプライヤーのprice listから商品をインポートし、在庫とcost priceをサプライヤー起点で同期します。</p>
+          </div>
+          <span class="source-badge">Products + Shipping</span>
+        </div>
+        <div class="diagram-wrap">
+          <pre class="mermaid">flowchart TD
+    A["RetailerがCollectiveアプリを開く"] --> B["接続済みSupplierのprice listを確認"]
+    B --> C["商品を選択してインポート&lt;br/&gt;またはimport policyを適用"]
+    C --> D["Retailerストアに商品を作成&lt;br/&gt;Shopify Collectiveとsupplierタグを付与"]
+    D --> E["商品情報をコピー&lt;br/&gt;title, description, media, SKU, barcode, weight, origin, HS code"]
+    E --> F["Retailerが販売チャネルに公開"]
+
+    F --> G{"在庫"}
+    G --> G1["SupplierのsellableOnlineQuantityをRetailer在庫に反映"]
+    G --> G2["Supplierまたは接続Retailerでの購入が共有在庫を減らす"]
+    G --> G3["Shopify checkoutがSupplier在庫を確認"]
+
+    F --> H{"配送"}
+    H --> H1["インポート商品はShopify Collective shipping profileに入る"]
+    H --> H2["Collective Carrier ServiceがSupplier請求レートを返す"]
+    H --> H3["Retailerは別profileへ移して購入者向け送料を変更できる"]
+
+    F --> I{"価格"}
+    I --> I1["Cost priceはsupplier price listから常時同期"]
+    I --> I2["Retail priceはRetailer管理またはSupplier同期"]
+    I --> I3["Retailer discountはRetailer利益を減らす&lt;br/&gt;Supplier cost priceは変えない"]</pre>
+        </div>
+        <ul class="notes">
+          <li>在庫はSupplierの<code>sellableOnlineQuantity</code>から反映され、接続ストアに伝播します。</li>
+          <li>高トラフィック時は伝播遅延がありえますが、Shopify checkoutではSupplier在庫を確認します。</li>
+          <li>Cost priceと在庫はSupplier起点、Retail priceと購入者向け送料は設定によりRetailer側で管理できます。</li>
+        </ul>
+      </section>
+
+      <section class="section" aria-labelledby="supplier-listing">
+        <div class="section-header">
+          <div>
+            <h2 id="supplier-listing">2. サプライヤーの商品共有</h2>
+            <p class="section-lede">サプライヤーは商品をCollective Supplierチャネルに公開し、price list、マージン、送料、アクセス方式を設定します。</p>
+          </div>
+          <span class="source-badge">Supplier flow</span>
+        </div>
+        <div class="diagram-wrap">
+          <pre class="mermaid">flowchart TD
+    A["SupplierがCollectiveアプリを開く"] --> B{"要件確認&lt;br/&gt;Shopify Payments, plan, region, currency"}
+    B -->|"未充足"| X["要件を満たすまで共有不可"]
+    B -->|"充足"| C["Shopifyに商品を作成または外部システムから同期"]
+    C --> D["商品ステータスをACTIVEにする"]
+    D --> E["Collective Supplier販売チャネルへ公開"]
+    E --> F["Collective price listを作成"]
+    F --> G["商品、retailer margin、cost price条件を設定"]
+    F --> H["Supplier shipping ratesを設定"]
+    F --> I{"アクセス方式"}
+    I --> I1["Open access"]
+    I --> I2["Closed access"]
+    G --> J["Retailerへprice listを共有"]
+    H --> J
+    I --> J
+    J --> K["Retailerがアクセス承認後に商品をインポート"]</pre>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="orders">
+        <div class="section-header">
+          <div>
+            <h2 id="orders">3. 注文、フルフィルメント、支払い</h2>
+            <p class="section-lede">購入後、Retailer注文が先に作成され、支払いと不正チェック後にSupplier注文・フルフィルメントへルーティングされます。</p>
+          </div>
+          <span class="source-badge">Orders + Payments</span>
+        </div>
+        <div class="diagram-wrap">
+          <pre class="mermaid">sequenceDiagram
+    participant Cust as Customer
+    participant Ret as Retailer Store
+    participant Checkout as Shopify Checkout
+    participant COL as Shopify Collective
+    participant Sup as Supplier Store
+    participant SP as Shopify Payments
+
+    Cust->>Ret: Checkout
+    Ret->>Checkout: Collective商品を含むcartを送信
+    Checkout->>COL: Supplier在庫を確認
+    alt Supplier在庫なし
+      Checkout-->>Cust: 数量変更または削除を求める
+    else Supplier在庫あり
+      Cust->>Ret: 支払い済み注文を作成
+      Ret-->>COL: Retailer注文作成
+      COL->>COL: 約2分のpayment / fraud check
+      COL->>Sup: Fulfillment requestを送りSupplier注文を作成
+      COL->>SP: Automatic PaymentsがONならRetailer残高をdebit
+      Sup->>Sup: 商品をフルフィルメント
+      Sup-->>COL: Fulfillment update
+      COL->>Ret: Fulfillment / trackingを同期
+      COL->>SP: Supplier残高へcredit
+    end</pre>
+        </div>
+        <ul class="notes">
+          <li>Supplier注文は、Retailer注文の支払いと不正チェック後、保留がない場合にSupplier側へ作成されます。</li>
+          <li>Supplierはエンド顧客へ直接フルフィルメントします。</li>
+          <li>Automatic Paymentsの金額は、Supplier注文とShopify Payments adjustmentで照合します。</li>
+        </ul>
+      </section>
+
+      <section class="section" aria-labelledby="returns">
+        <div class="section-header">
+          <div>
+            <h2 id="returns">4. キャンセル、返金、返品</h2>
+            <p class="section-lede">キャンセルと返品は、支払い状態、フルフィルメント状態、小売の返品設定により処理が分かれます。</p>
+          </div>
+          <span class="source-badge">Cancellations + Returns</span>
+        </div>
+        <h3>キャンセル</h3>
+        <div class="diagram-wrap">
+          <pre class="mermaid">flowchart TD
+    A["RetailerがSupplier fulfillment orderのキャンセルを要求"] --> B{"支払い済み?"}
+    B -->|"No"| C["Collectiveが自動キャンセル"]
+    B -->|"Yes"| D["Supplierが承認または拒否"]
+    D -->|"承認"| E["Supplier cancellation notification"]
+    E --> F["Retailer注文が自動キャンセルまたは更新"]
+    D -->|"拒否"| G["Retailerが拒否通知を受け取る"]
+
+    H["Supplierがフルフィルメント前にキャンセル"] --> I["Retailer注文も自動キャンセル"]
+    I --> J["返金が自動処理される"]</pre>
+        </div>
+        <h3>返品</h3>
+        <div class="diagram-wrap">
+          <pre class="mermaid">flowchart TD
+    A["CustomerがRetailerストアで返品開始"] --> B{"Retailer返品設定"}
+    B -->|"Retailerがラベル発行"| C["Retailer returnを承認"]
+    C --> D["CollectiveがSupplier returnを作成"]
+    D --> E["Supplierが返送品を受領して返金処理"]
+    E --> F["CollectiveがRetailer returnをrestock / close"]
+    F --> G{"返金設定"}
+    G -->|"自動返金"| H["Collectiveが顧客返金を処理"]
+    G -->|"手動返金"| I["Retailerがreturn close後に顧客返金"]
+
+    B -->|"Supplierがラベル発行"| J["CollectiveがSupplierへreturn request"]
+    J --> K["Supplierが承認しラベルをアップロード"]
+    K --> L["ラベルがRetailer注文と顧客メールへ同期"]
+    L --> E
+
+    B -->|"No action"| M["CollectiveはSupplier側返品を管理しない"]
+    M --> N["Retailerが手動で返金、restock、close"]</pre>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="changes">
+        <div class="section-header">
+          <div>
+            <h2 id="changes">5. 価格、在庫、商品情報の変更</h2>
+            <p class="section-lede">Supplier起点のcost priceと在庫はRetailerへ同期されます。Retailerのdiscountや購入者向け送料はRetailer利益に影響します。</p>
+          </div>
+          <span class="source-badge">Change behavior</span>
+        </div>
+        <div class="diagram-wrap">
+          <pre class="mermaid">flowchart TD
+    A["Supplierが商品、在庫、price list、retail price sync、送料を変更"] --> B{"変更種別"}
+    B -->|"商品情報"| C["同期対象フィールドをRetailer商品へ反映"]
+    B -->|"在庫"| D["sellableOnlineQuantityをRetailer在庫へ反映"]
+    B -->|"Cost price / margin"| E["Supplier管理のcost priceを同期"]
+    B -->|"Retail price"| F["Retail price syncがONならRetailer商品へ反映"]
+    B -->|"Supplier shipping"| G["RetailerがSupplierへ支払う送料が将来注文で変わる"]
+
+    C --> H["同期ONのRetailer商品に反映"]
+    D --> I["接続ストアの利用可能在庫が更新"]
+    E --> J["将来注文のSupplier金額に影響"]
+    F --> J
+    G --> J
+    J --> K["既存の支払い済み注文はorder change, cancellation, refund, returnで調整"]</pre>
+        </div>
+        <div class="diagram-wrap">
+          <pre class="mermaid">flowchart TD
+    A["Retailerが購入者向け設定を変更"] --> B{"変更種別"}
+    B -->|"Shipping"| C["購入者向け送料を変更"]
+    B -->|"Retail price"| D{"Retail price sync ON?"}
+    D -->|"No"| E["Retailer管理価格として購入者請求額を変更"]
+    D -->|"Yes"| F["Supplier更新時にRetail priceが追随"]
+    B -->|"Discount"| G["顧客の支払額が減る"]
+    G --> H["Supplier cost priceは変わらず&lt;br/&gt;Retailer利益が減る"]</pre>
+        </div>
+      </section>
+
+      <section class="section" id="faq" aria-labelledby="faq-title">
+        <div class="section-header">
+          <div>
+            <h2 id="faq-title">FAQ</h2>
+            <p class="section-lede">よくある実装・運用上の疑問を、公開ドキュメントとMarkdownソースに基づいて整理します。</p>
+          </div>
+          <span class="source-badge">Source + Help Center</span>
+        </div>
+        <div class="faq-list">
+          <article class="faq-item">
+            <h3>サプライヤーのストアには、いつ注文データが作成されますか？</h3>
+            <p>Retailer注文が先に作成されます。支払い後、Collectiveは約2分間の不正チェックを待ち、注文が保留でなければSupplierへフルフィルメントリクエストを送り、Retailerのfulfillment orderとSupplier注文をリンクします。この時点でSupplierストアに注文が見えます。</p>
+          </article>
+          <article class="faq-item">
+            <h3>サプライヤーの注文金額はどのように決定されますか？</h3>
+            <p>顧客のチェックアウト総額そのものではありません。Supplierのcost price、Retailerへ請求されるSupplier shipping、適用される税や調整によって決まります。正確な照合はSupplier注文、Retailer注文のnotes/custom attributes、Shopify Payments adjustmentで確認します。</p>
+          </article>
+          <article class="faq-item">
+            <h3>サプライヤーと小売の在庫の同期はどのように行われますか？</h3>
+            <p>Supplierの<code>sellableOnlineQuantity</code>がRetailerの利用可能在庫に反映されます。Supplierストアまたは接続Retailerストアで購入があると共有在庫が減り、接続ストアへ伝播します。Shopify checkoutではSupplier在庫も確認されます。</p>
+          </article>
+          <article class="faq-item">
+            <h3>サプライヤーと小売で、在庫数が食い違うことはありますか？</h3>
+            <p>あります。同期伝播中の一時的な差分は起こりえます。平均同期時間は30秒未満ですが、最大5分かかる場合があります。Shopify checkoutではSupplier在庫チェックが働きますが、手動注文作成や商品・ロケーション設定の破損までは保護しません。</p>
+          </article>
+          <article class="faq-item">
+            <h3>商品マスターは必ずサプライヤー側で登録しなければならないですか？</h3>
+            <p>Collectiveで共有するには、商品がSupplierのShopifyストアに存在し、ACTIVEで、Collective Supplierチャネルに公開され、price listに含まれている必要があります。ただし、上流のマスターはERPやPIMなど外部システムでも構いません。</p>
+          </article>
+          <article class="faq-item">
+            <h3>サプライヤーで商品データや価格、在庫を変更した場合、小売のデータはどうなりますか？</h3>
+            <p>在庫とcost priceはSupplierからRetailerへ継続同期されます。Retail priceは、Retailerが自分で管理するか、Supplierから同期するかを設定できます。title、description、media、categoryなどは、同期設定やproduct policyに応じてコピー・継続同期されます。</p>
+          </article>
+          <article class="faq-item">
+            <h3>小売で商品データや価格、在庫を変更した場合、サプライヤーのデータはどうなりますか？</h3>
+            <p>Retailer側の編集はSupplierの元商品を更新しません。Retailerはbuyer-facingなtitle、description、media、retail priceなどを編集できますが、Supplier管理フィールドはSupplier側が管理します。インポート商品の在庫はRetailer adminでは読み取り専用です。</p>
+          </article>
+          <article class="faq-item">
+            <h3>小売でディスカウントを設定した場合、サプライヤーの注文金額はどうなりますか？</h3>
+            <p>Retailerのディスカウントは顧客支払額を下げ、Retailer利益を減らしますが、Supplierのcost priceは変わりません。たとえばretail priceが100 USD、cost priceが70 USDの商品に20 USDの顧客割引を適用しても、商品部分としてSupplierへ支払うcost priceは70 USDのままです。</p>
+          </article>
+          <article class="faq-item">
+            <h3>Shopify Paymentsを使って決済された注文の場合、サプライヤーに入金される金額とサプライヤーの注文金額は一致しますか？</h3>
+            <p>銀行入金として一対一に一致するとは限りません。Automatic PaymentsがONの場合、Supplierのフルフィルメント後にRetailer残高からdebitされ、Supplier残高へcreditされます。ただしpayoutは複数支払いを集約し、返金、返品、キャンセル、reversal、送料、税、partial fulfillment、タイミング、残高状況の影響を受けます。</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section" id="references" aria-labelledby="references-title">
+        <div class="section-header">
+          <div>
+            <h2 id="references-title">References</h2>
+            <p class="section-lede">英語Markdownがこのページのソースです。外部リンクは、内容確認に使うShopify developer docsとHelp Centerです。</p>
+          </div>
+          <span class="source-badge">Source + Shopify docs</span>
+        </div>
+        <div class="reference-grid">
+          <a href="../../../products/shopify-collective/architecture.md">Source Markdown<span>このページのローカルソース</span></a>
+          <a href="https://shopify.dev/docs/apps/build/collective">About Shopify Collective<span>Developer overview</span></a>
+          <a href="https://shopify.dev/docs/apps/build/collective/products">Share and import products<span>商品インポート、同期、価格、在庫</span></a>
+          <a href="https://shopify.dev/docs/apps/build/collective/shipping">Define shipping rates<span>Supplier送料と購入者向け送料</span></a>
+          <a href="https://shopify.dev/docs/apps/build/collective/orders">Request and accept fulfillment orders<span>注文ルーティングとAutomatic Payments</span></a>
+          <a href="https://shopify.dev/docs/apps/build/collective/returns">Handle returns<span>返品と返金オプション</span></a>
+          <a href="https://help.shopify.com/en/manual/online-sales-channels/shopify-collective/suppliers/price-lists">Supplier price lists<span>Cost price、margin、discounts</span></a>
+          <a href="https://help.shopify.com/en/manual/online-sales-channels/shopify-collective/retailers/importing-products">Retailer product management<span>商品編集、price sync、在庫</span></a>
+          <a href="https://help.shopify.com/en/manual/online-sales-channels/shopify-collective/retailers/payments">Retailer supplier payments<span>Cost price、shipping、支払い</span></a>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      Rendered from <a href="../../../products/shopify-collective/architecture.md">products/shopify-collective/architecture.md</a>.
+    </footer>
+
+    <script type="module">
+      import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs";
+
+      mermaid.initialize({
+        startOnLoad: true,
+        securityLevel: "loose",
+        theme: "base",
+        themeVariables: {
+          primaryColor: "#e2f3eb",
+          primaryTextColor: "#17221b",
+          primaryBorderColor: "#008060",
+          lineColor: "#596660",
+          secondaryColor: "#e7f0f8",
+          tertiaryColor: "#ffffff",
+          fontFamily: "Noto Sans JP, Inter, ui-sans-serif, system-ui, sans-serif"
+        }
+      });
+    </script>
+  </body>
+</html>

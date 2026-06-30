@@ -9,9 +9,11 @@ It does not describe Shopify internal implementation details. The diagrams combi
 - **Supplier:** The merchant that owns the source products, shares them through Shopify Collective, and fulfills orders directly to the end customer.
 - **Retailer:** The merchant that imports supplier products, sells them on its storefront, and handles the customer relationship.
 - **Price list / catalog:** The supplier-managed set of products and commercial terms shared with retailers. Price lists are managed in the Shopify admin or Collective app, not through the public API.
+- **Cost price:** The supplier-side amount the retailer owes the supplier for a product sold through Collective. It is derived from the supplier's retail price and the retailer margin set on the supplier price list, and it is continuously synced from the supplier.
+- **Retail price:** The buyer-facing product price on the retailer store. Retailers can adjust it unless they choose to keep the supplier's retail price synchronized.
 - **Open access:** A merchant-facing sharing model where retailers can discover supplier products and request access.
 - **Closed access:** A merchant-facing sharing model where access is limited to invited or approved retailers.
-- **Margin:** The retailer's retained economics after the supplier-side product cost, supplier shipping, tax, and payment adjustments are accounted for. Exact amounts should be validated from order and Shopify Payments adjustment records.
+- **Margin / profit:** The retailer's retained economics after the supplier-side cost price, supplier shipping, tax, discounts, and payment adjustments are accounted for. Exact amounts should be validated from order and Shopify Payments adjustment records.
 - **Automatic payments:** Collective can debit the retailer's Shopify Payments account and credit the supplier's Shopify Payments account when Automatic Payments are enabled.
 
 ## 1. Retailer Product Import and Publication
@@ -37,16 +39,17 @@ flowchart TD
     H --> H3["Retailer can move products to another shipping profile<br/>and define buyer-facing shipping rates"]
 
     F --> I{"Price behavior"}
-    I --> I1["Supplier price list price is synced to the retailer store"]
-    I --> I2["Direct retailer edits to synced price are reverted to the supplier price"]
+    I --> I1["Supplier cost price is always synced from the price list"]
+    I --> I2["Retail price can be retailer-managed<br/>or synchronized from the supplier"]
+    I --> I3["Retailer discounts reduce retailer profit<br/>but do not change supplier cost price"]
 ```
 
 Notes:
 
-- Inventory sync is real-time across connected stores, but the checkout-level supplier inventory check is the protection that matters during high-volume sales. This protection applies to Shopify checkout, not manual order insertion.
-- Product content can optionally stay in sync with the supplier. The documented copied fields include title, description, media, category, compare-at price, product type, SKU, barcode, weight, country or region of origin, and HS code.
+- Inventory sync is continuous across connected stores, and the checkout-level supplier inventory check is the protection that matters during high-volume sales. This protection applies to Shopify checkout, not manual order insertion. Help Center guidance also notes that average syncing time is less than 30 seconds but can take up to 5 minutes.
+- Product content can optionally stay in sync with the supplier. The documented copied fields include title, description, media, category, compare-at price, product type, SKU, barcode, weight, country or region of origin, and HS code. Collections, tags, discount codes, and custom metafields are not imported from the supplier.
 - Retailers can customize what buyers pay for shipping. Supplier-defined shipping rates determine what the retailer pays the supplier for fulfillment to the end customer.
-- Product price is supplier-controlled through the Collective price list. Retailer economics should be modeled from the price list, order totals, shipping rates, tax, and payment adjustments rather than from arbitrary product price edits.
+- Supplier cost price is controlled through the Collective price list. Retailers can choose their buyer-facing retail price and can apply discounts, but those changes affect retailer profit rather than the supplier cost price.
 
 ## 2. Supplier Listing Flow
 
@@ -242,16 +245,18 @@ Supplier-side changes can affect imported products, future orders, retailer econ
 
 ```mermaid
 flowchart TD
-    A["Supplier updates product, inventory, price list, or shipping settings"] --> B{"Change type"}
+    A["Supplier updates product, inventory, price list, retail price sync, or shipping settings"] --> B{"Change type"}
 
     B -->|"Content field"| C["Optional content sync updates retailer product<br/>title, description, media, category, SKU, barcode, weight, origin, HS code"]
     B -->|"Inventory"| D["sellableOnlineQuantity updates retailer available inventory"]
-    B -->|"Price list price"| E["Supplier-controlled price syncs to retailer product"]
+    B -->|"Cost price / retailer margin"| E["Supplier-controlled cost price syncs to retailer product"]
+    B -->|"Retail price"| K["Retail price updates retailer product<br/>when retail price sync is enabled"]
     B -->|"Supplier shipping rate"| F["Retailer-to-supplier shipping amount changes for future orders"]
 
     C --> G["Retailer product reflects synced supplier data when sync is enabled"]
     D --> H["Connected stores receive updated available quantity"]
     E --> I["Future orders use updated supplier price list terms"]
+    K --> I
     F --> I
     I --> J["Existing paid orders keep order-time amounts and are adjusted only through order changes, cancellations, refunds, or returns"]
 ```
@@ -259,13 +264,14 @@ flowchart TD
 Notes:
 
 - Supplier inventory is the source used to populate available inventory on retailer stores.
-- Supplier price list price is synced to the retailer store. Direct changes to the synced product price on the retailer store are reverted to the supplier price.
+- Supplier cost price is always synced to the retailer store and the retailer cannot edit it.
+- Retail price sync is off by default in the merchant-facing Collective app, and retailers can adjust retail price when they manage it themselves. If retail price sync is enabled, the retailer product follows supplier retail price updates.
 - Supplier shipping rates determine what the retailer pays the supplier for fulfilling the order to the end customer.
 - If supplier cost or shipping increases while buyer-facing charges do not increase equivalently, retailer retained margin can decrease. If supplier cost or shipping decreases, retailer retained margin can increase.
 
-## 8. Retailer Buyer-Facing Shipping Changes
+## 8. Retailer Buyer-Facing Shipping, Retail Price, and Discount Changes
 
-Retailers can customize what buyers pay for shipping, but Collective product price is controlled by the supplier price list.
+Retailers can customize what buyers pay for shipping, can adjust buyer-facing retail price when they do not synchronize it from the supplier, and can apply discounts. These changes affect the retailer's profit, but they do not change the supplier cost price.
 
 ```mermaid
 flowchart TD
@@ -276,14 +282,57 @@ flowchart TD
     D --> F["Buyer shipping charge can differ from supplier-to-retailer shipping rate"]
     F --> G["Retailer shipping margin or subsidy changes"]
 
-    H["Retailer attempts direct product price edit"] --> I["Price is reverted to supplier price list value"]
+    H["Retailer edits retail price"] --> I{"Retail price sync enabled?"}
+    I -->|"No"| J["Retailer-managed retail price changes buyer charge"]
+    I -->|"Yes"| K["Retail price follows supplier updates<br/>retailer edits do not change supplier source data"]
+
+    L["Retailer applies discount code or promotion"] --> M["Buyer pays less"]
+    M --> N["Supplier cost price is unchanged<br/>retailer profit decreases"]
 ```
 
 Notes:
 
 - There are two shipping rates to model separately: what the retailer charges the buyer, and what the supplier charges the retailer.
 - Moving Collective products to a retailer-managed shipping profile lets the retailer define buyer-facing rates.
-- Product pricing should be treated as supplier-synced through the Collective price list. Retailer margin changes should be modeled through price list economics, buyer-facing shipping, refunds, taxes, and payment adjustments.
+- Supplier cost price should be treated as supplier-synced through the Collective price list. Retailer profit changes should be modeled through cost price, buyer-facing retail price, discounts, shipping, refunds, taxes, and payment adjustments.
+
+## FAQ
+
+### When is order data created in the supplier store?
+
+The retailer order is created first. After the order is paid, Shopify Collective waits about 2 minutes for fraud checks. If the order is not on hold, Collective sends the fulfillment request to the supplier, links the retailer fulfillment order with the supplier order, and the supplier sees the order in the supplier Shopify admin.
+
+### How is the supplier order amount determined?
+
+The supplier-side amount is not the customer's full checkout total. It is based on the supplier-side cost price for the sold products, the supplier shipping cost charged to the retailer, and any applicable taxes or order/payment adjustments. Cost price is determined by the supplier price list, usually from the product retail price minus the retailer margin. The exact amount should be validated from the supplier order, retailer order additional notes or custom attributes, and Shopify Payments adjustment records.
+
+### How is inventory synchronized between supplier and retailer?
+
+When a supplier shares a product through a Collective price list, supplier `sellableOnlineQuantity` is used to populate available inventory in the retailer store. Purchases on the supplier store or connected retailer stores decrease the shared available quantity, and the change is propagated to connected stores. Shopify checkout also checks supplier inventory during checkout to protect against overselling.
+
+### Can supplier and retailer inventory quantities diverge?
+
+Yes, temporary divergence can happen while inventory updates propagate, especially during high-volume sales. Merchant documentation states that average syncing time is less than 30 seconds but can take up to 5 minutes. Shopify checkout checks supplier inventory before completing a sale, but that protection does not apply to manual order insertion. Divergence or broken sync can also occur if the Collective inventory location is changed, if product access is removed, or if POS-only inventory assumptions are used because POS inventory levels are not synced to retailers.
+
+### Must product master data always be registered on the supplier side?
+
+For Shopify Collective sharing, the product must exist in the supplier Shopify store, be active, be published to the Collective (Supplier) sales channel, and be added to a Collective price list. The operational source of truth can still be an ERP, PIM, or another external system, as long as that system syncs the product into Shopify before the supplier shares it through Collective.
+
+### What happens to retailer data if the supplier changes product data, price, or inventory?
+
+Inventory and cost price are continuously synced from the supplier to retailer stores. Retail price sync is controlled separately: retailers can manage retail price themselves, or they can enable retail price syncing from the supplier. Other product details, such as title, description, media, and category, can be copied and optionally kept in sync depending on product policy and sync settings.
+
+### What happens to supplier data if the retailer changes product data, price, or inventory?
+
+Retailer-side edits do not update the supplier's source product. Retailers can edit certain buyer-facing product details such as retail price, title, description, and media, but supplier-managed fields remain controlled by the supplier. Inventory quantities for imported Collective products are managed by the supplier and are read-only in the retailer admin. Retailer edits to synced or supplier-controlled fields can be overwritten when the supplier updates the original product or can break expected sync behavior if the Collective inventory location or product connection is changed.
+
+### What happens to the supplier order amount if the retailer configures a discount?
+
+Retailer discounts change what the customer pays and reduce the retailer's profit, but they do not change the supplier cost price for the item. For example, if a product has a retail price of 100 USD and a supplier cost price of 70 USD, a 20 USD customer discount reduces the retailer's profit but the retailer still owes the supplier 70 USD for the product. Shipping, taxes, refunds, returns, and payment adjustments still need to be reconciled separately.
+
+### For orders paid with Shopify Payments, does the amount deposited to the supplier match the supplier order amount?
+
+Not always as a one-to-one bank deposit. When Automatic Payments are enabled, Collective debits the retailer's Shopify Payments balance and credits the supplier's Shopify Payments balance after the supplier fulfills the order. The supplier can view transferred amounts for product and shipping on Collective payment records, and integrations can inspect `shopifyPaymentsAccount` adjustments for the associated order. However, payouts can aggregate multiple payments and can be affected by refunds, returns, cancellations, reversals, taxes, shipping, partial fulfillment, payment timing, insufficient funds, and Shopify Payments balance behavior. Use the supplier order plus the payment adjustment records as the reconciliation source.
 
 ## References
 
@@ -296,5 +345,9 @@ Notes:
 - [Build an ERP integration for Shopify Collective](https://shopify.dev/docs/apps/build/collective/erp-integration-tutorial)
 - [Shopify Collective Help Center overview](https://help.shopify.com/en/manual/online-sales-channels/shopify-collective/index)
 - [Shopify Collective for suppliers](https://help.shopify.com/en/manual/online-sales-channels/shopify-collective/suppliers/index)
+- [Setting up and managing price lists on the Shopify Collective sales channel](https://help.shopify.com/en/manual/online-sales-channels/shopify-collective/suppliers/price-lists)
+- [Getting paid on the Shopify Collective sales channel](https://help.shopify.com/en/manual/online-sales-channels/shopify-collective/suppliers/payments)
 - [Shopify Collective for retailers](https://help.shopify.com/en/manual/online-sales-channels/shopify-collective/retailers/index)
+- [Managing products in the Shopify Collective app](https://help.shopify.com/en/manual/online-sales-channels/shopify-collective/retailers/importing-products)
+- [Paying your suppliers in the Shopify Collective app](https://help.shopify.com/en/manual/online-sales-channels/shopify-collective/retailers/payments)
 - [Requirements and considerations for using the Shopify Collective app](https://help.shopify.com/en/manual/online-sales-channels/shopify-collective/retailers/requirements-and-considerations)

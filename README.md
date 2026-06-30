@@ -14,6 +14,13 @@ The goal is to collect product-specific architecture notes, integration behavior
 
 The HTML site entry point is [`index.html`](./index.html). Product pages live in product-specific directories, and each HTML page links back to the Markdown source used to build the visualization.
 
+Rendered entry points:
+
+- [English site](./index.html)
+- [Japanese site](./ja/index.html)
+- [Shopify Collective English HTML](./products/shopify-collective/index.html)
+- [Shopify Collective Japanese HTML](./ja/products/shopify-collective/index.html)
+
 ## Disclaimer
 
 This repository is not official Shopify documentation. The maintainers do not accept responsibility for the accuracy, completeness, or consequences of using this content. Use it at your own discretion as supplemental material for understanding Shopify concepts and workflows. Content may change without notice.
@@ -21,6 +28,7 @@ This repository is not official Shopify documentation. The maintainers do not ac
 ## Document Style
 
 - Use English for document text, headings, diagrams, and technical labels unless a Japanese version is explicitly requested.
+- Keep source Markdown in English. Rendered HTML uses English as the master output and Japanese pages under `/ja/` as localized output.
 - Keep each document focused on one Shopify product or product area.
 - Prefer Mermaid diagrams for architecture, sequence, and state-flow explanations.
 - Include links to relevant Shopify documentation when they help readers validate the behavior.
