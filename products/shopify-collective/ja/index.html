@@ -253,7 +253,7 @@
         min-width: 1100px;
         width: max-content;
         margin: 0;
-        font-size: 10px;
+        font-size: 12px;
       }
 
       .mermaid svg {
@@ -268,7 +268,7 @@
       .mermaid svg .noteText,
       .mermaid svg .loopText,
       .mermaid svg .labelText {
-        font-size: 10px !important;
+        font-size: 12px !important;
       }
 
       .diagram-wrap.is-expanded {
@@ -550,13 +550,40 @@
         </div>
       </section>
 
+      <section class="section" aria-labelledby="connections">
+        <div class="section-header">
+          <div>
+            <h2 id="connections">3. 小売業者とサプライヤーの接続モデル</h2>
+            <p class="section-lede">接続とprice listの関係がintegration boundaryです。招待はCollectiveアプリで管理されます。</p>
+          </div>
+          <span class="source-badge">Connection model</span>
+        </div>
+        <div class="diagram-wrap">
+          <pre class="mermaid">flowchart LR
+    subgraph PUB["公開 / Open access"]
+      direction TB
+      P1["サプライヤーが商品をdiscoverableにする"] --> P2["小売業者がサプライヤー商品を発見"]
+      P2 --> P3["小売業者がaccessまたはpricingをリクエスト"]
+      P3 --> P4["サプライヤーがリクエストを承認"]
+      P4 --> P5["小売業者が商品をインポート"]
+    end
+
+    subgraph PRI["非公開 / Closed access"]
+      direction TB
+      R1["サプライヤーまたは小売業者が招待を送信"] --> R2["招待されたマーチャントが承諾"]
+      R2 --> R3["共有price listへのaccessを付与"]
+      R3 --> R4["小売業者が商品をインポート"]
+    end</pre>
+        </div>
+      </section>
+
       <section class="section" aria-labelledby="orders">
         <div class="section-header">
           <div>
-            <h2 id="orders">3. 注文、フルフィルメント、支払い</h2>
-            <p class="section-lede">購入後、小売業者注文が先に作成され、支払いと不正チェック後にサプライヤー注文・フルフィルメントへルーティングされます。</p>
+            <h2 id="orders">4. 小売業者の注文フロー</h2>
+            <p class="section-lede">支払いと不正チェック後、Collectiveは小売業者のfulfillment orderとサプライヤー注文をリンクし、フルフィルメントをサプライヤーへルーティングします。</p>
           </div>
-          <span class="source-badge">Orders + Payments</span>
+          <span class="source-badge">Orders + ERP</span>
         </div>
         <div class="diagram-wrap">
           <pre class="mermaid">sequenceDiagram
@@ -567,22 +594,22 @@
     participant Sup as サプライヤーストア
     participant SP as Shopify Payments
 
-    Cust->>Ret: Checkout
+    Cust->>Ret: Checkout開始
     Ret->>Checkout: Collective商品を含むcartを送信
-    Checkout->>COL: サプライヤー在庫を確認
+    Checkout->>COL: checkout中にサプライヤー在庫を確認
     alt サプライヤー在庫なし
       Checkout-->>Cust: 数量変更または削除を求める
     else サプライヤー在庫あり
       Cust->>Ret: 支払い済み注文を作成
-      Ret-->>COL: 小売業者注文作成
-      COL->>COL: 約2分のpayment / fraud check
-      COL->>Sup: Fulfillment requestを送りサプライヤー注文を作成
-      COL->>SP: Automatic PaymentsがONなら小売業者残高をdebit
-      Sup->>Sup: 商品をフルフィルメント
-      Sup-->>COL: Fulfillment update
-      COL->>Ret: Fulfillment / trackingを同期
-      COL->>SP: サプライヤー残高へcredit
-    end</pre>
+      Ret-->>COL: Shopify Collectiveタグ付き小売業者注文を作成
+      COL->>COL: payment / fraud checkを待機&lt;br/&gt;約2分
+      COL->>Sup: fulfillment requestを送信し&lt;br/&gt;リンクされたサプライヤー注文を作成
+      COL->>Ret: 小売業者注文へサプライヤータグと&lt;br/&gt;サプライヤー注文情報を追加
+      COL->>SP: Automatic PaymentsがONなら&lt;br/&gt;小売業者のShopify Payments残高をdebit
+    end
+
+    Note over Ret,Sup: サプライヤーは小売業者ではなくエンド顧客へ直接フルフィルメントします。
+    Note over COL: CollectiveはCollective商品のorder splitting、payment routing、shipping label generationを処理します。</pre>
         </div>
         <ul class="notes">
           <li>サプライヤー注文は、小売業者注文の支払いと不正チェック後、保留がない場合にサプライヤー側へ作成されます。</li>
@@ -591,10 +618,38 @@
         </ul>
       </section>
 
+      <section class="section" aria-labelledby="fulfillment">
+        <div class="section-header">
+          <div>
+            <h2 id="fulfillment">5. サプライヤーのフルフィルメントと入金</h2>
+            <p class="section-lede">サプライヤーは顧客へ直接フルフィルメントします。Collectiveはfulfillmentを同期し、Automatic PaymentsがONならサプライヤーのShopify Paymentsへcreditできます。</p>
+          </div>
+          <span class="source-badge">Fulfillment</span>
+        </div>
+        <div class="diagram-wrap">
+          <pre class="mermaid">sequenceDiagram
+    participant Sup as サプライヤーストア
+    participant COL as Shopify Collective
+    participant Ret as 小売業者ストア
+    participant Cust as Customer
+    participant SP as Shopify Payments
+
+    COL->>Sup: サプライヤー注文 / fulfillment requestが利用可能
+    Sup->>Sup: Shopify, ERP, OMS, WMSで注文処理
+    Sup->>Sup: fulfillmentとtracking detailsを作成
+    Sup-->>COL: Fulfillment update
+    COL->>Ret: fulfillment statusとtrackingを小売業者注文へ同期
+    Ret-->>Cust: 設定に応じて顧客向けshipping notificationを送信
+    COL->>SP: Automatic PaymentsがONなら&lt;br/&gt;サプライヤーのShopify Payments残高へcredit
+
+    Note over COL,SP: partial fulfillmentではfulfilled itemsに応じてpayment adjustmentが発生します。shippingとtaxの正確な扱いはShopify Payments adjustmentで確認します。</pre>
+        </div>
+      </section>
+
       <section class="section" aria-labelledby="returns">
         <div class="section-header">
           <div>
-            <h2 id="returns">4. キャンセル、返金、返品</h2>
+            <h2 id="returns">6. キャンセル、返金、返品</h2>
             <p class="section-lede">キャンセルと返品は、支払い状態、フルフィルメント状態、小売業者の返品設定により処理が分かれます。</p>
           </div>
           <span class="source-badge">Cancellations + Returns</span>
@@ -637,7 +692,7 @@
       <section class="section" aria-labelledby="changes">
         <div class="section-header">
           <div>
-            <h2 id="changes">5. 価格、在庫、商品情報の変更</h2>
+            <h2 id="changes">7. 価格、在庫、商品情報の変更</h2>
             <p class="section-lede">サプライヤー起点のcost priceと在庫は小売業者へ同期されます。小売業者のdiscountや購入者向け送料は小売業者利益に影響します。</p>
           </div>
           <span class="source-badge">Change behavior</span>
@@ -759,9 +814,9 @@
         },
         sequence: {
           useMaxWidth: false,
-          actorFontSize: 10,
-          messageFontSize: 10,
-          noteFontSize: 10
+          actorFontSize: 12,
+          messageFontSize: 12,
+          noteFontSize: 12
         },
         themeVariables: {
           primaryColor: "#e2f3eb",
@@ -770,7 +825,7 @@
           lineColor: "#596660",
           secondaryColor: "#e7f0f8",
           tertiaryColor: "#ffffff",
-          fontSize: "10px",
+          fontSize: "12px",
           fontFamily: "Noto Sans JP, Inter, ui-sans-serif, system-ui, sans-serif"
         }
       });

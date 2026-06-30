@@ -34,3 +34,9 @@ This repository is not official Shopify documentation. The maintainers do not ac
 - Keep each document focused on one Shopify product or product area.
 - Prefer Mermaid diagrams for architecture, sequence, and state-flow explanations.
 - Include links to relevant Shopify documentation when they help readers validate the behavior.
+
+## Visualization Conventions
+
+- Use `12px` as the standard Mermaid diagram font size in HTML outputs.
+- Apply the same `12px` sizing to sequence diagram actors, messages, notes, loop labels, and condition labels.
+- Keep English and Japanese HTML outputs substantively aligned; localized pages should not omit diagram labels, notes, or claims that appear in the English master output.
