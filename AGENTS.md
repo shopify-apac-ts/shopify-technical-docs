@@ -25,6 +25,7 @@ This repository is a source-first documentation library for Shopify product arch
 - Whenever HTML visualization pages are created or materially changed, also create or update the Japanese HTML version under the product directory's `ja/` path.
 - Keep Japanese HTML as a localized output derived from the English Markdown source and English master HTML, not as an independent source of truth.
 - Keep PPTX decks as localized outputs derived from the English Markdown source, not as independent sources of truth.
+- When updating English and Japanese HTML or PPTX outputs, verify that both language versions contain the same substantive content with no missing or extra claims.
 
 ## Site Structure
 
@@ -45,6 +46,7 @@ This repository is a source-first documentation library for Shopify product arch
 - Use Mermaid diagrams for architecture, sequence, state, and process-flow explanations when they help readability.
 - Do not include internal Shopify information. Content should be based on public documentation or merchant-visible behavior that can be validated in a store.
 - Keep repository documentation, HTML pages, and PPTX decks focused on product specifications, architecture, flows, references, and disclaimers.
+- In Japanese HTML and PPTX outputs, use `小売業者` for retailer and `サプライヤー` for supplier in explanatory content unless preserving an official product/channel name or source title.
 
 ## Disclaimer
 

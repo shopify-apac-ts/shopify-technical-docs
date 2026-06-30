@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Shopify Collective アーキテクチャ</title>
-    <meta name="description" content="Shopify Collectiveの小売・サプライヤーフローを日本語で可視化したページ。">
+    <meta name="description" content="Shopify Collectiveの小売業者・サプライヤーフローを日本語で可視化したページ。">
     <style>
       :root {
         color-scheme: light;
@@ -368,7 +368,7 @@
       <div class="hero-inner">
         <div>
           <span class="eyebrow">Architecture</span>
-          <h1 id="page-title">Shopify Collective 小売・サプライヤーフロー</h1>
+          <h1 id="page-title">Shopify Collective 小売業者・サプライヤーフロー</h1>
           <p>
             商品共有、インポート、在庫・価格同期、配送、注文ルーティング、Automatic Payments、キャンセル、返品、価格変更を日本語で可視化します。
           </p>
@@ -395,10 +395,10 @@
           <span class="source-badge">Source: architecture.md</span>
         </div>
         <div class="terms">
-          <div class="term"><strong>Supplier</strong><span>商品を所有し、Collectiveで共有し、エンド顧客へ直接フルフィルメントするマーチャント。</span></div>
-          <div class="term"><strong>Retailer</strong><span>サプライヤー商品をインポートし、自ストアで販売し、顧客接点を持つマーチャント。</span></div>
-          <div class="term"><strong>Cost price</strong><span>Collective経由の販売で、小売がサプライヤーに支払う商品側の金額。</span></div>
-          <div class="term"><strong>Retail price</strong><span>小売ストアで購入者に表示・請求される商品価格。</span></div>
+          <div class="term"><strong>サプライヤー</strong><span>商品を所有し、Collectiveで共有し、エンド顧客へ直接フルフィルメントするマーチャント。</span></div>
+          <div class="term"><strong>小売業者</strong><span>サプライヤー商品をインポートし、自ストアで販売し、顧客接点を持つマーチャント。</span></div>
+          <div class="term"><strong>Cost price</strong><span>Collective経由の販売で、小売業者がサプライヤーに支払う商品側の金額。</span></div>
+          <div class="term"><strong>Retail price</strong><span>小売業者ストアで購入者に表示・請求される商品価格。</span></div>
         </div>
       </section>
 
@@ -413,37 +413,37 @@
         <div class="section-header">
           <div>
             <h2 id="import">1. 商品インポートと公開</h2>
-            <p class="section-lede">小売はサプライヤーのprice listから商品をインポートし、在庫とcost priceをサプライヤー起点で同期します。</p>
+            <p class="section-lede">小売業者はサプライヤーのprice listから商品をインポートし、在庫とcost priceをサプライヤー起点で同期します。</p>
           </div>
           <span class="source-badge">Products + Shipping</span>
         </div>
         <div class="diagram-wrap">
           <pre class="mermaid">flowchart TD
-    A["RetailerがCollectiveアプリを開く"] --> B["接続済みSupplierのprice listを確認"]
+    A["小売業者がCollectiveアプリを開く"] --> B["接続済みサプライヤーのprice listを確認"]
     B --> C["商品を選択してインポート&lt;br/&gt;またはimport policyを適用"]
-    C --> D["Retailerストアに商品を作成&lt;br/&gt;Shopify Collectiveとsupplierタグを付与"]
+    C --> D["小売業者ストアに商品を作成&lt;br/&gt;Shopify Collectiveとサプライヤータグを付与"]
     D --> E["商品情報をコピー&lt;br/&gt;title, description, media, SKU, barcode, weight, origin, HS code"]
-    E --> F["Retailerが販売チャネルに公開"]
+    E --> F["小売業者が販売チャネルに公開"]
 
     F --> G{"在庫"}
-    G --> G1["Supplierのオンライン販売可能在庫をRetailer在庫に反映"]
-    G --> G2["Supplierまたは接続Retailerでの購入が共有在庫を減らす"]
-    G --> G3["Shopify checkoutがSupplier在庫を確認"]
+    G --> G1["サプライヤーのオンライン販売可能在庫を小売業者在庫に反映"]
+    G --> G2["サプライヤーまたは接続小売業者での購入が共有在庫を減らす"]
+    G --> G3["Shopify checkoutがサプライヤー在庫を確認"]
 
     F --> H{"配送"}
     H --> H1["インポート商品はShopify Collective shipping profileに入る"]
-    H --> H2["Collective Carrier ServiceがSupplier請求レートを返す"]
-    H --> H3["Retailerは別profileへ移して購入者向け送料を変更できる"]
+    H --> H2["Collective Carrier Serviceがサプライヤー請求レートを返す"]
+    H --> H3["小売業者は別profileへ移して購入者向け送料を変更できる"]
 
     F --> I{"価格"}
-    I --> I1["Cost priceはsupplier price listから常時同期"]
-    I --> I2["Retail priceはRetailer管理またはSupplier同期"]
-    I --> I3["Retailer discountはRetailer利益を減らす&lt;br/&gt;Supplier cost priceは変えない"]</pre>
+    I --> I1["Cost priceはサプライヤーprice listから常時同期"]
+    I --> I2["Retail priceは小売業者管理またはサプライヤー同期"]
+    I --> I3["小売業者のdiscountは小売業者利益を減らす&lt;br/&gt;サプライヤーcost priceは変えない"]</pre>
         </div>
         <ul class="notes">
-          <li>在庫はSupplierのオンライン販売可能在庫から反映され、接続ストアに伝播します。</li>
-          <li>高トラフィック時は伝播遅延がありえますが、Shopify checkoutではSupplier在庫を確認します。</li>
-          <li>Cost priceと在庫はSupplier起点、Retail priceと購入者向け送料は設定によりRetailer側で管理できます。</li>
+          <li>在庫はサプライヤーのオンライン販売可能在庫から反映され、接続ストアに伝播します。</li>
+          <li>高トラフィック時は伝播遅延がありえますが、Shopify checkoutではサプライヤー在庫を確認します。</li>
+          <li>Cost priceと在庫はサプライヤー起点、Retail priceと購入者向け送料は設定により小売業者側で管理できます。</li>
         </ul>
       </section>
 
@@ -453,25 +453,25 @@
             <h2 id="supplier-listing">2. サプライヤーの商品共有</h2>
             <p class="section-lede">サプライヤーは商品をCollective Supplierチャネルに公開し、price list、マージン、送料、アクセス方式を設定します。</p>
           </div>
-          <span class="source-badge">Supplier flow</span>
+          <span class="source-badge">サプライヤーフロー</span>
         </div>
         <div class="diagram-wrap">
           <pre class="mermaid">flowchart TD
-    A["SupplierがCollectiveアプリを開く"] --> B{"要件確認&lt;br/&gt;Shopify Payments, plan, region, currency"}
+    A["サプライヤーがCollectiveアプリを開く"] --> B{"要件確認&lt;br/&gt;Shopify Payments, plan, region, currency"}
     B -->|"未充足"| X["要件を満たすまで共有不可"]
     B -->|"充足"| C["Shopifyに商品を作成または外部システムから同期"]
     C --> D["商品ステータスをACTIVEにする"]
     D --> E["Collective Supplier販売チャネルへ公開"]
     E --> F["Collective price listを作成"]
-    F --> G["商品、retailer margin、cost price条件を設定"]
-    F --> H["Supplier shipping ratesを設定"]
+    F --> G["商品、小売業者margin、cost price条件を設定"]
+    F --> H["サプライヤー送料を設定"]
     F --> I{"アクセス方式"}
     I --> I1["Open access"]
     I --> I2["Closed access"]
-    G --> J["Retailerへprice listを共有"]
+    G --> J["小売業者へprice listを共有"]
     H --> J
     I --> J
-    J --> K["Retailerがアクセス承認後に商品をインポート"]</pre>
+    J --> K["小売業者がアクセス承認後に商品をインポート"]</pre>
         </div>
       </section>
 
@@ -479,40 +479,40 @@
         <div class="section-header">
           <div>
             <h2 id="orders">3. 注文、フルフィルメント、支払い</h2>
-            <p class="section-lede">購入後、Retailer注文が先に作成され、支払いと不正チェック後にSupplier注文・フルフィルメントへルーティングされます。</p>
+            <p class="section-lede">購入後、小売業者注文が先に作成され、支払いと不正チェック後にサプライヤー注文・フルフィルメントへルーティングされます。</p>
           </div>
           <span class="source-badge">Orders + Payments</span>
         </div>
         <div class="diagram-wrap">
           <pre class="mermaid">sequenceDiagram
     participant Cust as Customer
-    participant Ret as Retailer Store
+    participant Ret as 小売業者ストア
     participant Checkout as Shopify Checkout
     participant COL as Shopify Collective
-    participant Sup as Supplier Store
+    participant Sup as サプライヤーストア
     participant SP as Shopify Payments
 
     Cust->>Ret: Checkout
     Ret->>Checkout: Collective商品を含むcartを送信
-    Checkout->>COL: Supplier在庫を確認
-    alt Supplier在庫なし
+    Checkout->>COL: サプライヤー在庫を確認
+    alt サプライヤー在庫なし
       Checkout-->>Cust: 数量変更または削除を求める
-    else Supplier在庫あり
+    else サプライヤー在庫あり
       Cust->>Ret: 支払い済み注文を作成
-      Ret-->>COL: Retailer注文作成
+      Ret-->>COL: 小売業者注文作成
       COL->>COL: 約2分のpayment / fraud check
-      COL->>Sup: Fulfillment requestを送りSupplier注文を作成
-      COL->>SP: Automatic PaymentsがONならRetailer残高をdebit
+      COL->>Sup: Fulfillment requestを送りサプライヤー注文を作成
+      COL->>SP: Automatic PaymentsがONなら小売業者残高をdebit
       Sup->>Sup: 商品をフルフィルメント
       Sup-->>COL: Fulfillment update
       COL->>Ret: Fulfillment / trackingを同期
-      COL->>SP: Supplier残高へcredit
+      COL->>SP: サプライヤー残高へcredit
     end</pre>
         </div>
         <ul class="notes">
-          <li>Supplier注文は、Retailer注文の支払いと不正チェック後、保留がない場合にSupplier側へ作成されます。</li>
-          <li>Supplierはエンド顧客へ直接フルフィルメントします。</li>
-          <li>Automatic Paymentsの金額は、Supplier注文とShopify Payments adjustmentで照合します。</li>
+          <li>サプライヤー注文は、小売業者注文の支払いと不正チェック後、保留がない場合にサプライヤー側へ作成されます。</li>
+          <li>サプライヤーはエンド顧客へ直接フルフィルメントします。</li>
+          <li>Automatic Paymentsの金額は、サプライヤー注文とShopify Payments adjustmentで照合します。</li>
         </ul>
       </section>
 
@@ -520,42 +520,42 @@
         <div class="section-header">
           <div>
             <h2 id="returns">4. キャンセル、返金、返品</h2>
-            <p class="section-lede">キャンセルと返品は、支払い状態、フルフィルメント状態、小売の返品設定により処理が分かれます。</p>
+            <p class="section-lede">キャンセルと返品は、支払い状態、フルフィルメント状態、小売業者の返品設定により処理が分かれます。</p>
           </div>
           <span class="source-badge">Cancellations + Returns</span>
         </div>
         <h3>キャンセル</h3>
         <div class="diagram-wrap">
           <pre class="mermaid">flowchart TD
-    A["RetailerがSupplier fulfillment orderのキャンセルを要求"] --> B{"支払い済み?"}
+    A["小売業者がサプライヤーfulfillment orderのキャンセルを要求"] --> B{"支払い済み?"}
     B -->|"No"| C["Collectiveが自動キャンセル"]
-    B -->|"Yes"| D["Supplierが承認または拒否"]
-    D -->|"承認"| E["Supplier cancellation notification"]
-    E --> F["Retailer注文が自動キャンセルまたは更新"]
-    D -->|"拒否"| G["Retailerが拒否通知を受け取る"]
+    B -->|"Yes"| D["サプライヤーが承認または拒否"]
+    D -->|"承認"| E["サプライヤーcancellation notification"]
+    E --> F["小売業者注文が自動キャンセルまたは更新"]
+    D -->|"拒否"| G["小売業者が拒否通知を受け取る"]
 
-    H["Supplierがフルフィルメント前にキャンセル"] --> I["Retailer注文も自動キャンセル"]
+    H["サプライヤーがフルフィルメント前にキャンセル"] --> I["小売業者注文も自動キャンセル"]
     I --> J["返金が自動処理される"]</pre>
         </div>
         <h3>返品</h3>
         <div class="diagram-wrap">
           <pre class="mermaid">flowchart TD
-    A["CustomerがRetailerストアで返品開始"] --> B{"Retailer返品設定"}
-    B -->|"Retailerがラベル発行"| C["Retailer returnを承認"]
-    C --> D["CollectiveがSupplier returnを作成"]
-    D --> E["Supplierが返送品を受領して返金処理"]
-    E --> F["CollectiveがRetailer returnをrestock / close"]
+    A["顧客が小売業者ストアで返品開始"] --> B{"小売業者返品設定"}
+    B -->|"小売業者がラベル発行"| C["小売業者返品を承認"]
+    C --> D["Collectiveがサプライヤー returnを作成"]
+    D --> E["サプライヤーが返送品を受領して返金処理"]
+    E --> F["Collectiveが小売業者返品をrestock / close"]
     F --> G{"返金設定"}
     G -->|"自動返金"| H["Collectiveが顧客返金を処理"]
-    G -->|"手動返金"| I["Retailerがreturn close後に顧客返金"]
+    G -->|"手動返金"| I["小売業者がreturn close後に顧客返金"]
 
-    B -->|"Supplierがラベル発行"| J["CollectiveがSupplierへreturn request"]
-    J --> K["Supplierが承認しラベルをアップロード"]
-    K --> L["ラベルがRetailer注文と顧客メールへ同期"]
+    B -->|"サプライヤーがラベル発行"| J["Collectiveがサプライヤーへreturn request"]
+    J --> K["サプライヤーが承認しラベルをアップロード"]
+    K --> L["ラベルが小売業者注文と顧客メールへ同期"]
     L --> E
 
-    B -->|"No action"| M["CollectiveはSupplier側返品を管理しない"]
-    M --> N["Retailerが手動で返金、restock、close"]</pre>
+    B -->|"No action"| M["Collectiveはサプライヤー側返品を管理しない"]
+    M --> N["小売業者が手動で返金、restock、close"]</pre>
         </div>
       </section>
 
@@ -563,35 +563,35 @@
         <div class="section-header">
           <div>
             <h2 id="changes">5. 価格、在庫、商品情報の変更</h2>
-            <p class="section-lede">Supplier起点のcost priceと在庫はRetailerへ同期されます。Retailerのdiscountや購入者向け送料はRetailer利益に影響します。</p>
+            <p class="section-lede">サプライヤー起点のcost priceと在庫は小売業者へ同期されます。小売業者のdiscountや購入者向け送料は小売業者利益に影響します。</p>
           </div>
           <span class="source-badge">Change behavior</span>
         </div>
         <div class="diagram-wrap">
           <pre class="mermaid">flowchart TD
-    A["Supplierが商品、在庫、price list、retail price sync、送料を変更"] --> B{"変更種別"}
-    B -->|"商品情報"| C["同期対象フィールドをRetailer商品へ反映"]
-    B -->|"在庫"| D["Supplierのオンライン販売可能在庫をRetailer在庫へ反映"]
-    B -->|"Cost price / margin"| E["Supplier管理のcost priceを同期"]
-    B -->|"Retail price"| F["Retail price syncがONならRetailer商品へ反映"]
-    B -->|"Supplier shipping"| G["RetailerがSupplierへ支払う送料が将来注文で変わる"]
+    A["サプライヤーが商品、在庫、price list、retail price sync、送料を変更"] --> B{"変更種別"}
+    B -->|"商品情報"| C["同期対象フィールドを小売業者商品へ反映"]
+    B -->|"在庫"| D["サプライヤーのオンライン販売可能在庫を小売業者在庫へ反映"]
+    B -->|"Cost price / margin"| E["サプライヤー管理のcost priceを同期"]
+    B -->|"Retail price"| F["Retail price syncがONなら小売業者商品へ反映"]
+    B -->|"サプライヤー送料"| G["小売業者がサプライヤーへ支払う送料が将来注文で変わる"]
 
-    C --> H["同期ONのRetailer商品に反映"]
+    C --> H["同期ONの小売業者商品に反映"]
     D --> I["接続ストアの利用可能在庫が更新"]
-    E --> J["将来注文のSupplier金額に影響"]
+    E --> J["将来注文のサプライヤー金額に影響"]
     F --> J
     G --> J
     J --> K["既存の支払い済み注文はorder change, cancellation, refund, returnで調整"]</pre>
         </div>
         <div class="diagram-wrap">
           <pre class="mermaid">flowchart TD
-    A["Retailerが購入者向け設定を変更"] --> B{"変更種別"}
+    A["小売業者が購入者向け設定を変更"] --> B{"変更種別"}
     B -->|"Shipping"| C["購入者向け送料を変更"]
     B -->|"Retail price"| D{"Retail price sync ON?"}
-    D -->|"No"| E["Retailer管理価格として購入者請求額を変更"]
-    D -->|"Yes"| F["Supplier更新時にRetail priceが追随"]
+    D -->|"No"| E["小売業者管理価格として購入者請求額を変更"]
+    D -->|"Yes"| F["サプライヤー更新時にRetail priceが追随"]
     B -->|"Discount"| G["顧客の支払額が減る"]
-    G --> H["Supplier cost priceは変わらず&lt;br/&gt;Retailer利益が減る"]</pre>
+    G --> H["サプライヤーcost priceは変わらず&lt;br/&gt;小売業者利益が減る"]</pre>
         </div>
       </section>
 
@@ -606,39 +606,39 @@
         <div class="faq-list">
           <article class="faq-item">
             <h3>サプライヤーのストアには、いつ注文データが作成されますか？</h3>
-            <p>Retailer注文が先に作成されます。支払い後、Collectiveは約2分間の不正チェックを待ち、注文が保留でなければSupplierへフルフィルメントリクエストを送り、Retailerのfulfillment orderとSupplier注文をリンクします。この時点でSupplierストアに注文が見えます。ERP、OMS、WMS、会計システムなど外部システムへ同期する場合は、対象ストアの注文作成・注文更新Webhookを起点にします。</p>
+            <p>小売業者の注文が先に作成されます。支払い後、Collectiveは約2分間の不正チェックを待ち、注文が保留でなければサプライヤーへフルフィルメントリクエストを送り、小売業者のフルフィルメント注文とサプライヤー注文をリンクします。この時点でサプライヤーストアに注文が見えます。ERP、OMS、WMS、会計システムなど外部システムへ同期する場合は、対象ストアの注文作成・注文更新Webhookを起点にします。</p>
           </article>
           <article class="faq-item">
             <h3>サプライヤーの注文金額はどのように決定されますか？</h3>
-            <p>顧客のチェックアウト総額そのものではありません。Supplierのcost price、Retailerへ請求されるSupplier shipping、適用される税や調整によって決まります。正確な照合はSupplier注文、Retailer注文の追加メモやカスタム情報、Shopify Payments adjustmentで確認します。外部の会計・ERPシステムでは、注文Webhookを変更フィードとして使い、最終的な資金移動はpayment adjustmentで照合します。</p>
+            <p>顧客のチェックアウト総額そのものではありません。サプライヤーのcost price、小売業者へ請求されるサプライヤー送料、適用される税や調整によって決まります。正確な照合はサプライヤー注文、小売業者注文の追加メモやカスタム情報、Shopify Payments adjustmentで確認します。外部の会計・ERPシステムでは、注文Webhookを変更フィードとして使い、最終的な資金移動はpayment adjustmentで照合します。</p>
           </article>
           <article class="faq-item">
-            <h3>サプライヤーと小売の在庫の同期はどのように行われますか？</h3>
-            <p>Supplierのオンライン販売可能在庫がRetailerの利用可能在庫に反映されます。Supplierストアまたは接続Retailerストアで購入があると共有在庫が減り、接続ストアへ伝播します。Shopify checkoutではSupplier在庫も確認されます。Retailer側のインポート商品を外部システムへ同期する場合は、商品作成・商品更新・商品削除Webhookを使います。</p>
+            <h3>サプライヤーと小売業者の在庫の同期はどのように行われますか？</h3>
+            <p>サプライヤーのオンライン販売可能在庫が小売業者の利用可能在庫に反映されます。サプライヤーストアまたは接続小売業者ストアで購入があると共有在庫が減り、接続ストアへ伝播します。Shopify checkoutではサプライヤー在庫も確認されます。小売業者側のインポート商品を外部システムへ同期する場合は、商品作成・商品更新・商品削除Webhookを使います。</p>
           </article>
           <article class="faq-item">
-            <h3>サプライヤーと小売で、在庫数が食い違うことはありますか？</h3>
-            <p>あります。同期伝播中の一時的な差分は起こりえます。平均同期時間は30秒未満ですが、最大5分かかる場合があります。Shopify checkoutではSupplier在庫チェックが働きますが、手動注文作成や商品・ロケーション設定の破損までは保護しません。</p>
+            <h3>サプライヤーと小売業者で、在庫数が食い違うことはありますか？</h3>
+            <p>あります。同期伝播中の一時的な差分は起こりえます。平均同期時間は30秒未満ですが、最大5分かかる場合があります。Shopify checkoutではサプライヤー在庫チェックが働きますが、手動注文作成や商品・ロケーション設定の破損までは保護しません。</p>
           </article>
           <article class="faq-item">
             <h3>商品マスターは必ずサプライヤー側で登録しなければならないですか？</h3>
-            <p>Collectiveで共有するには、商品がSupplierのShopifyストアに存在し、ACTIVEで、Collective Supplierチャネルに公開され、price listに含まれている必要があります。ただし、上流のマスターはERPやPIMなど外部システムでも構いません。Retailer側にインポートされた後、その商品を下流システムへ同期する場合は商品Webhookを使います。</p>
+            <p>Collectiveで共有するには、商品がサプライヤーのShopifyストアに存在し、ACTIVEで、Collective Supplierチャネルに公開され、price listに含まれている必要があります。ただし、上流のマスターはERPやPIMなど外部システムでも構いません。小売業者側にインポートされた後、その商品を下流システムへ同期する場合は商品Webhookを使います。</p>
           </article>
           <article class="faq-item">
-            <h3>サプライヤーで商品データや価格、在庫を変更した場合、小売のデータはどうなりますか？</h3>
-            <p>在庫とcost priceはSupplierからRetailerへ継続同期されます。Retail priceは、Retailerが自分で管理するか、Supplierから同期するかを設定できます。title、description、media、categoryなどは、同期設定やproduct policyに応じてコピー・継続同期されます。Retailer側の外部連携でこれらの変更を追従する場合は商品Webhookを使います。</p>
+            <h3>サプライヤーで商品データや価格、在庫を変更した場合、小売業者のデータや注文金額はどうなりますか？</h3>
+            <p>在庫とcost priceはサプライヤーから小売業者へ継続同期されます。Retail priceは、小売業者が自分で管理するか、サプライヤーから同期するかを設定できます。title、description、media、categoryなどは、同期設定やproduct policyに応じてコピー・継続同期されます。将来の注文では、更新後のサプライヤーcost price、サプライヤー送料、retail price同期設定、在庫が小売業者の経済性とサプライヤー注文金額に影響します。既存の支払い済み注文は、注文変更、キャンセル、返金、返品、payment adjustmentがない限り注文時点の金額を維持します。小売業者側の外部連携でこれらの変更を追従する場合は商品Webhookを使います。</p>
           </article>
           <article class="faq-item">
-            <h3>小売で商品データや価格、在庫を変更した場合、サプライヤーのデータはどうなりますか？</h3>
-            <p>Retailer側の編集はSupplierの元商品を更新しません。Retailerはbuyer-facingなtitle、description、media、retail priceなどを編集できますが、Supplier管理フィールドはSupplier側が管理します。インポート商品の在庫はRetailer adminでは読み取り専用です。Retailerストアに接続された外部システムは、商品WebhookをRetailer側の商品更新として扱い、Supplierの商品マスター変更とは区別します。</p>
+            <h3>小売業者で商品データや価格、在庫を変更した場合、サプライヤーのデータや注文金額はどうなりますか？</h3>
+            <p>小売業者側の編集はサプライヤーの元商品を更新しません。小売業者はbuyer-facingなtitle、description、media、retail priceなどを編集できますが、サプライヤー管理フィールドはサプライヤー側が管理します。インポート商品の在庫は小売業者adminでは読み取り専用です。小売業者側の価格変更、ディスカウント、商品情報の編集は、サプライヤーcost priceやサプライヤーの商品マスターを変更しません。サプライヤー注文金額は、引き続きサプライヤーcost price、サプライヤー送料、税、注文または支払い調整に基づきます。小売業者ストアに接続された外部システムは、商品Webhookを小売業者側の商品更新として扱い、サプライヤーの商品マスター変更とは区別します。</p>
           </article>
           <article class="faq-item">
-            <h3>小売でディスカウントを設定した場合、サプライヤーの注文金額はどうなりますか？</h3>
-            <p>Retailerのディスカウントは顧客支払額を下げ、Retailer利益を減らしますが、Supplierのcost priceは変わりません。たとえばretail priceが100 USD、cost priceが70 USDの商品に20 USDの顧客割引を適用しても、商品部分としてSupplierへ支払うcost priceは70 USDのままです。</p>
+            <h3>小売業者でディスカウントを設定したり、サプライヤーの金額より安くした場合、サプライヤーの注文金額はどうなりますか？</h3>
+            <p>小売業者のディスカウントや購入者向け価格の変更は、顧客支払額と小売業者利益に影響しますが、サプライヤーのcost priceは変わりません。小売業者がディスカウントしたり、サプライヤー側のcost priceより低い購入者向け価格で販売した場合、小売業者の利益は小さくなり、場合によってはマイナスになります。それでも、サプライヤーへ支払う商品部分の金額はサプライヤーcost priceに基づきます。たとえばretail priceが100 USD、cost priceが70 USDの商品に20 USDの顧客割引を適用しても、商品部分としてサプライヤーへ支払うcost priceは70 USDのままです。</p>
           </article>
           <article class="faq-item">
             <h3>Shopify Paymentsを使って決済された注文の場合、サプライヤーに入金される金額とサプライヤーの注文金額は一致しますか？</h3>
-            <p>銀行入金として一対一に一致するとは限りません。Automatic PaymentsがONの場合、Supplierのフルフィルメント後にRetailer残高からdebitされ、Supplier残高へcreditされます。ただしpayoutは複数支払いを集約し、返金、返品、キャンセル、reversal、送料、税、partial fulfillment、タイミング、残高状況の影響を受けます。外部会計システムでは注文Webhook、返品・返金Webhook、payment adjustmentの照合を組み合わせます。</p>
+            <p>銀行入金として一対一に一致するとは限りません。Automatic PaymentsがONの場合、サプライヤーのフルフィルメント後に小売業者残高からdebitされ、サプライヤー残高へcreditされます。ただしpayoutは複数支払いを集約し、返金、返品、キャンセル、reversal、送料、税、partial fulfillment、タイミング、残高状況の影響を受けます。外部会計システムでは注文Webhook、返品・返金Webhook、payment adjustmentの照合を組み合わせます。</p>
           </article>
         </div>
       </section>
@@ -657,12 +657,12 @@
           <a href="./shopify-collective-architecture-ja.pptx">Japanese PPTX<span>Markdownソースから生成した日本語スライド</span></a>
           <a href="https://shopify.dev/docs/apps/build/collective">About Shopify Collective<span>Developer overview</span></a>
           <a href="https://shopify.dev/docs/apps/build/collective/products">Share and import products<span>商品インポート、同期、価格、在庫</span></a>
-          <a href="https://shopify.dev/docs/apps/build/collective/shipping">Define shipping rates<span>Supplier送料と購入者向け送料</span></a>
+          <a href="https://shopify.dev/docs/apps/build/collective/shipping">Define shipping rates<span>サプライヤー送料と購入者向け送料</span></a>
           <a href="https://shopify.dev/docs/apps/build/collective/orders">Request and accept fulfillment orders<span>注文ルーティングとAutomatic Payments</span></a>
           <a href="https://shopify.dev/docs/apps/build/collective/returns">Handle returns<span>返品と返金オプション</span></a>
-          <a href="https://help.shopify.com/en/manual/online-sales-channels/shopify-collective/suppliers/price-lists">Supplier price lists<span>Cost price、margin、discounts</span></a>
-          <a href="https://help.shopify.com/en/manual/online-sales-channels/shopify-collective/retailers/importing-products">Retailer product management<span>商品編集、price sync、在庫</span></a>
-          <a href="https://help.shopify.com/en/manual/online-sales-channels/shopify-collective/retailers/payments">Retailer supplier payments<span>Cost price、shipping、支払い</span></a>
+          <a href="https://help.shopify.com/en/manual/online-sales-channels/shopify-collective/suppliers/price-lists">サプライヤーprice lists<span>Cost price、margin、discounts</span></a>
+          <a href="https://help.shopify.com/en/manual/online-sales-channels/shopify-collective/retailers/importing-products">小売業者の商品管理<span>商品編集、price sync、在庫</span></a>
+          <a href="https://help.shopify.com/en/manual/online-sales-channels/shopify-collective/retailers/payments">小売業者のサプライヤー支払い<span>Cost price、shipping、支払い</span></a>
         </div>
       </section>
     </main>

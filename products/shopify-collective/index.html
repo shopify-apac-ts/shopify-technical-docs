@@ -714,16 +714,16 @@
             <p>The product must exist in the supplier Shopify store, be active, be published to the Collective Supplier channel, and be included in a Collective price list. The upstream source can still be an ERP, PIM, or other external system. After retailer import, downstream retailer systems can use product creation, update, and deletion webhooks.</p>
           </article>
           <article class="faq-item">
-            <h3>What happens to retailer data if the supplier changes product data, price, or inventory?</h3>
-            <p>Inventory and cost price are continuously synced from the supplier. Retail price follows the supplier only when retail price sync is enabled. Other product details can be copied and optionally kept in sync depending on product policy and sync settings. Retailer-side integrations should use product webhooks when they need to mirror those changes externally.</p>
+            <h3>What happens to retailer data and order amounts if the supplier changes product data, price, or inventory?</h3>
+            <p>Inventory and cost price are continuously synced from the supplier. Retail price follows the supplier only when retail price sync is enabled. Other product details can be copied and optionally kept in sync depending on product policy and sync settings. Future orders can use updated supplier cost, supplier shipping, retail price sync settings, and inventory availability; existing paid orders keep order-time amounts unless changed by order edits, cancellations, refunds, returns, or payment adjustments. Retailer-side integrations should use product webhooks when they need to mirror those changes externally.</p>
           </article>
           <article class="faq-item">
-            <h3>What happens to supplier data if the retailer changes product data, price, or inventory?</h3>
-            <p>Retailer-side edits do not update the supplier source product. Retailers can edit buyer-facing details such as retail price, title, description, and media, but supplier-managed fields remain controlled by the supplier and some edits can be overwritten by supplier updates. External systems connected to the retailer store should treat product webhooks as retailer-store updates, not supplier master-data changes.</p>
+            <h3>What happens to supplier data and order amounts if the retailer changes product data, price, or inventory?</h3>
+            <p>Retailer-side edits do not update the supplier source product. Retailers can edit buyer-facing details such as retail price, title, description, and media, but supplier-managed fields remain controlled by the supplier and some edits can be overwritten by supplier updates. Retailer-side price edits, discounts, and content edits do not change supplier cost price or supplier master data; supplier order amounts are still based on supplier cost price, supplier shipping, taxes, and order or payment adjustments. External systems connected to the retailer store should treat product webhooks as retailer-store updates, not supplier master-data changes.</p>
           </article>
           <article class="faq-item">
-            <h3>What happens to the supplier order amount if the retailer configures a discount?</h3>
-            <p>Retailer discounts change what the customer pays and reduce retailer profit, but they do not change the supplier cost price. A 100 USD retail price with a 70 USD cost price still owes the supplier 70 USD even when a 20 USD customer discount is applied.</p>
+            <h3>What happens to the supplier order amount if the retailer configures a discount or sells below the supplier-side amount?</h3>
+            <p>Retailer discounts and buyer-facing price changes affect what the customer pays and retailer profit, but they do not change supplier cost price. If the retailer discounts the item or sells below the supplier-side cost amount, the retailer can create a lower or negative margin while still owing the supplier based on supplier cost price. A 100 USD retail price with a 70 USD cost price still owes the supplier 70 USD even when a 20 USD customer discount is applied.</p>
           </article>
           <article class="faq-item">
             <h3>For orders paid with Shopify Payments, does the amount deposited to the supplier match the supplier order amount?</h3>
