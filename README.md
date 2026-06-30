@@ -20,6 +20,8 @@ Rendered entry points:
 - [Japanese site](./ja/index.html)
 - [Shopify Collective English HTML](./products/shopify-collective/index.html)
 - [Shopify Collective Japanese HTML](./ja/products/shopify-collective/index.html)
+- [Shopify Collective English PPTX](./products/shopify-collective/shopify-collective-architecture.pptx)
+- [Shopify Collective Japanese PPTX](./products/shopify-collective/ja/shopify-collective-architecture-ja.pptx)
 
 ## Disclaimer
 
@@ -29,6 +31,7 @@ This repository is not official Shopify documentation. The maintainers do not ac
 
 - Use English for document text, headings, diagrams, and technical labels unless a Japanese version is explicitly requested.
 - Keep source Markdown in English. Rendered HTML uses English as the master output and Japanese pages under `/ja/` as localized output.
+- Keep PPTX decks derived from the Markdown source. English decks live in the product directory, and Japanese decks live under the product directory's `ja/` folder with `-ja` before `.pptx`.
 - Keep each document focused on one Shopify product or product area.
 - Prefer Mermaid diagrams for architecture, sequence, and state-flow explanations.
 - Include links to relevant Shopify documentation when they help readers validate the behavior.
