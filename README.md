@@ -1,0 +1,18 @@
+# Shopify Technical Docs
+
+This repository is a documentation library for detailed specifications and process flows across Shopify products.
+
+The goal is to collect product-specific architecture notes, integration behavior, state transitions, and Mermaid-based flow diagrams in one place so they can be reused for technical discussions, partner enablement, and implementation planning.
+
+## Documents
+
+| Document | Shopify product | Coverage |
+| --- | --- | --- |
+| [Shopify Collective Architecture](./shopify-collective-architecture.md) | Shopify Collective | End-to-end connection, product sync, order routing, automatic payments, fulfillment, and returns flows. |
+
+## Document Style
+
+- Use English for document text, headings, diagrams, and technical labels unless a Japanese version is explicitly requested.
+- Keep each document focused on one Shopify product or product area.
+- Prefer Mermaid diagrams for architecture, sequence, and state-flow explanations.
+- Include links to relevant Shopify documentation when they help readers validate the behavior.
