@@ -18,6 +18,8 @@ This repository is a source-first documentation library for Shopify product arch
 - Do not create Japanese Markdown source files unless the user explicitly asks for them.
 - HTML is the visualization output for GitHub Pages.
 - English HTML is the master visualization output.
+- Whenever a source Markdown file changes, regenerate or manually update the corresponding English HTML visualization in the same task.
+- Whenever a source Markdown file changes, also regenerate or manually update the corresponding Japanese HTML visualization under `/ja/` in the same task.
 - Whenever HTML visualization pages are created or materially changed, also create or update the Japanese HTML version under a `/ja/` path.
 - Keep Japanese HTML as a localized output derived from the English Markdown source and English master HTML, not as an independent source of truth.
 
@@ -26,7 +28,7 @@ This repository is a source-first documentation library for Shopify product arch
 - The root `index.html` is the GitHub Pages entry point.
 - Product-specific files live under `products/<product-slug>/`.
 - Each product directory should contain the English Markdown source, such as `architecture.md`, and the English visualization page, such as `index.html`.
-- Japanese visualization pages should be accessible under `ja/`, mirroring the English page structure where practical.
+- Japanese visualization pages should be accessible under `ja/`, mirroring the English page structure where practical, such as `ja/products/<product-slug>/index.html`.
 - Each HTML visualization page must link back to its source Markdown file.
 - Update `README.md` when product documents are added, moved, renamed, or materially reorganized.
 
